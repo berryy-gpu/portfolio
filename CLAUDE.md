@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-This is a fresh foundation for a personal portfolio site. Only the app shell, providers, and tooling exist — no portfolio content/sections have been built yet. The site will be built section by section in later sessions; don't assume any page content beyond a placeholder `/` route exists.
+This is a fresh foundation for a personal portfolio site. Only the app shell, providers, and tooling exist — no portfolio content/sections have been built yet. The site will be built section by section in later sessions; don't assume any page content beyond a placeholder `/` route exists. Real project/social/profile media already exists under `public/` (see **Static assets** below) — use it directly, don't build placeholder-image logic for content that already has a real asset.
 
 ## Commands
 
@@ -37,6 +37,26 @@ To add a shadcn/ui component: `npx shadcn@latest add <component>` — writes int
   - `smooth-scroller.tsx` wires **Lenis** into the **GSAP ticker** (`gsap.ticker.add`, `lagSmoothing(0)`) and forwards Lenis scroll events to `ScrollTrigger.update`. This is the integration point that makes Lenis smooth-scroll and GSAP ScrollTrigger agree on scroll position — if you add scroll-driven animations, they should just work against this setup without any extra wiring.
 - `src/components/ui/` — shadcn-generated primitives only (e.g. `button.tsx`). Don't hand-edit generated variant files beyond what `shadcn add`/config would produce; treat them as regenerable.
 - No `src/components/sections/` or similar yet — create that convention when the first real portfolio section is built, following the pattern above (client components co-located with the hooks/animation logic they own).
+
+## Static assets
+
+`public/` has a fixed structure — **never rename or move these folders**, and always load assets dynamically from this layout rather than hardcoding a placeholder:
+
+```
+public/
+├── images/
+│   ├── projects/   # project showcase screenshots (flat, no subfolders)
+│   ├── social/     # per-client social content, one subfolder per client
+│   └── profile/    # personal/profile photo(s)
+└── videos/
+    ├── reels/      # short social reel clips
+    └── showreel/   # longer demo-reel videos (distinct from reels/)
+```
+
+Quirks to account for when writing code that reads these directories (e.g. a gallery/section that maps over a folder):
+- `public/images/social/` subfolder names and filenames have inconsistent casing (e.g. `cybernetix-01.jpg` vs `Cybernetix-03.jpg`, `pixelscape-01.jpg` vs `Pixelscape-10.jpg`) and mixed extensions (`.jpg`/`.jpeg`).
+- `public/images/social/friends perk/` contains a literal space in the folder name, and its filenames also contain spaces (e.g. `friends-perk-cafe 01.jpeg`) — URL-encode/escape when referencing these paths.
+- Nothing in `src/` references these paths yet — when you wire up sections, prefer generating file lists at build time (e.g. `fs.readdirSync` in a server component, or `next/image` with explicit imports) over assuming a naming convention, given the casing inconsistency above.
 
 ## Conventions to follow when building further
 
