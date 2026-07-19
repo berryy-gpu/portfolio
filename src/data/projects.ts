@@ -14,7 +14,6 @@ export interface Project {
   categoryIds: CategoryId[];
   summary?: string;
   images: ProjectImage[];
-  featured?: boolean;
   order?: number;
 }
 
@@ -24,7 +23,7 @@ export const projects: Project[] = [
     title: "Aureate",
     clientId: "aureate",
     categoryIds: ["website", "web-development"],
-    order: 1,
+    order: 3,
     images: [
       { src: "/images/projects/aureate-01.png", alt: "Aureate — screen 1" },
       { src: "/images/projects/aureate-02.png", alt: "Aureate — screen 2" },
@@ -39,7 +38,7 @@ export const projects: Project[] = [
     title: "Clix",
     clientId: "clix",
     categoryIds: ["website", "web-development"],
-    order: 2,
+    order: 4,
     images: [
       { src: "/images/projects/clix-homepage.png", alt: "Clix — homepage" },
       {
@@ -53,7 +52,7 @@ export const projects: Project[] = [
     title: "Cybernetix",
     clientId: "cybernetix",
     categoryIds: ["website", "web-development"],
-    order: 3,
+    order: 1,
     images: [
       {
         src: "/images/projects/cybernetix-homepage.png",
@@ -74,7 +73,7 @@ export const projects: Project[] = [
     title: "Hihat",
     clientId: "hihat",
     categoryIds: ["website", "web-development"],
-    order: 4,
+    order: 5,
     images: [
       { src: "/images/projects/hihat-homepage.png", alt: "Hihat — homepage" },
       { src: "/images/projects/hihat-aboutus.png", alt: "Hihat — about us" },
@@ -85,7 +84,7 @@ export const projects: Project[] = [
     title: "Pixelscape",
     clientId: "pixelscape",
     categoryIds: ["website", "web-development"],
-    order: 5,
+    order: 2,
     images: [
       {
         src: "/images/projects/pixelscape-homepage.png",

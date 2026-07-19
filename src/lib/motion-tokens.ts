@@ -20,6 +20,20 @@ export const easing = {
   hero: [0.16, 1, 0.3, 1],
 } as const;
 
+/**
+ * GSAP-native equivalents of the same five tokens. Framer Motion accepts
+ * cubic-bezier arrays directly; GSAP's `ease` option needs a named ease
+ * (or the CustomEase plugin) — these are the closest built-in matches to
+ * each token's intent, not a literal conversion of the curves above.
+ */
+export const gsapEasing = {
+  standard: "power2.inOut",
+  entrance: "power3.out",
+  exit: "power2.in",
+  hover: "power1.out",
+  hero: "expo.out",
+} as const;
+
 export const zIndex = {
   base: 0,
   elevated: 10,
