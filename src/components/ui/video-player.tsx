@@ -15,13 +15,27 @@ import { Volume2, VolumeX } from "lucide-react";
 import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils";
 
+type VideoAspectRatio = "9/16" | "16/9";
+
+const aspectRatioClasses: Record<VideoAspectRatio, string> = {
+  "9/16": "aspect-[9/16]",
+  "16/9": "aspect-video",
+};
+
 interface VideoPlayerProps {
   src: string;
   title: string;
   className?: string;
+  /** Defaults to the reel-native 9:16 portrait Craft in Motion uses. */
+  aspectRatio?: VideoAspectRatio;
 }
 
-export function VideoPlayer({ src, title, className }: VideoPlayerProps) {
+export function VideoPlayer({
+  src,
+  title,
+  className,
+  aspectRatio = "9/16",
+}: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { ref: containerRef, isInView } = useInView<HTMLDivElement>(0.5);
   const [isMuted, setIsMuted] = useState(true);
@@ -41,7 +55,8 @@ export function VideoPlayer({ src, title, className }: VideoPlayerProps) {
     <div
       ref={containerRef}
       className={cn(
-        "relative aspect-[9/16] w-full overflow-hidden rounded-lg border border-border bg-surface",
+        "relative w-full overflow-hidden rounded-lg border border-border bg-surface",
+        aspectRatioClasses[aspectRatio],
         className
       )}
     >
