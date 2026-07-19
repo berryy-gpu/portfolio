@@ -11,8 +11,7 @@
  */
 
 import { Badge } from "@/components/ui/badge";
-import { Container } from "@/components/ui/container";
-import { SectionHeader } from "@/components/ui/section-header";
+import { Section } from "@/components/ui/section";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { getClientById } from "@/data/clients";
 import { getCraftInMotionMedia } from "@/data/craft-in-motion";
@@ -35,32 +34,25 @@ export function CraftInMotion() {
   }
 
   return (
-    <section className="py-generous md:py-expansive">
-      <Container>
-        <SectionHeader title="Craft in Motion" />
+    <Section
+      header={{ title: "Craft in Motion" }}
+      contentRef={containerRef}
+      contentClassName="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+    >
+      {media.map((item) => {
+        const client = getClientById(item.clientId);
 
-        <div
-          ref={containerRef}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {media.map((item) => {
-            const client = getClientById(item.clientId);
-
-            return (
-              <div
-                key={item.id}
-                data-reveal="craft-card"
-                className="flex flex-col gap-3"
-              >
-                <VideoPlayer src={item.src} title={item.title} />
-                {client && (
-                  <Badge className="self-start">{client.name}</Badge>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </Container>
-    </section>
+        return (
+          <div
+            key={item.id}
+            data-reveal="craft-card"
+            className="flex flex-col gap-3"
+          >
+            <VideoPlayer src={item.src} title={item.title} />
+            {client && <Badge className="self-start">{client.name}</Badge>}
+          </div>
+        );
+      })}
+    </Section>
   );
 }

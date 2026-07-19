@@ -7,6 +7,23 @@ export interface ProjectImage {
   alt: string;
 }
 
+export interface WebsitePreviewImage {
+  src: ProjectImagePath;
+  alt: string;
+  /** Real intrinsic pixel dimensions — required by next/image and used to
+   *  size the scrolling preview without distorting the screenshot. */
+  width: number;
+  height: number;
+}
+
+export type WebsitePreviewType = "full-page" | "dashboard" | "mobile" | "application";
+
+export interface WebsitePreview {
+  image: WebsitePreviewImage;
+  domain: string;
+  type: WebsitePreviewType;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -14,6 +31,10 @@ export interface Project {
   categoryIds: CategoryId[];
   summary?: string;
   images: ProjectImage[];
+  /** The full-page homepage screenshot + real domain, used by Featured
+   *  Work's AnimatedWebsitePreview. Optional so a project without a real
+   *  domain/full-page capture yet doesn't need a placeholder. */
+  websitePreview?: WebsitePreview;
   order?: number;
 }
 
@@ -24,6 +45,16 @@ export const projects: Project[] = [
     clientId: "aureate",
     categoryIds: ["website", "web-development"],
     order: 3,
+    websitePreview: {
+      image: {
+        src: "/images/projects/aureate-01.png",
+        alt: "Aureate 161 — full homepage",
+        width: 1918,
+        height: 7210,
+      },
+      domain: "aureate161.com",
+      type: "full-page",
+    },
     images: [
       { src: "/images/projects/aureate-01.png", alt: "Aureate — screen 1" },
       { src: "/images/projects/aureate-02.png", alt: "Aureate — screen 2" },
@@ -39,6 +70,16 @@ export const projects: Project[] = [
     clientId: "clix",
     categoryIds: ["website", "web-development"],
     order: 4,
+    websitePreview: {
+      image: {
+        src: "/images/projects/clix-homepage.png",
+        alt: "Clix — full homepage",
+        width: 1918,
+        height: 8856,
+      },
+      domain: "clix-crm.com",
+      type: "full-page",
+    },
     images: [
       { src: "/images/projects/clix-homepage.png", alt: "Clix — homepage" },
       {
@@ -53,6 +94,16 @@ export const projects: Project[] = [
     clientId: "cybernetix",
     categoryIds: ["website", "web-development"],
     order: 1,
+    websitePreview: {
+      image: {
+        src: "/images/projects/cybernetix-homepage.png",
+        alt: "Cybernetix — full homepage",
+        width: 1896,
+        height: 8612,
+      },
+      domain: "cybernetix.ae",
+      type: "full-page",
+    },
     images: [
       {
         src: "/images/projects/cybernetix-homepage.png",
@@ -74,6 +125,16 @@ export const projects: Project[] = [
     clientId: "hihat",
     categoryIds: ["website", "web-development"],
     order: 5,
+    websitePreview: {
+      image: {
+        src: "/images/projects/hihat-homepage.png",
+        alt: "Hi-Hat Productions — full homepage",
+        width: 1916,
+        height: 8728,
+      },
+      domain: "hi-hatproductions.com",
+      type: "full-page",
+    },
     images: [
       { src: "/images/projects/hihat-homepage.png", alt: "Hihat — homepage" },
       { src: "/images/projects/hihat-aboutus.png", alt: "Hihat — about us" },
@@ -85,6 +146,16 @@ export const projects: Project[] = [
     clientId: "pixelscape",
     categoryIds: ["website", "web-development"],
     order: 2,
+    websitePreview: {
+      image: {
+        src: "/images/projects/pixelscape-homepage.png",
+        alt: "Pixelscape — full homepage",
+        width: 1918,
+        height: 6701,
+      },
+      domain: "pixelscape.com.pk",
+      type: "full-page",
+    },
     images: [
       {
         src: "/images/projects/pixelscape-homepage.png",

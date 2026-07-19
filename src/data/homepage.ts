@@ -8,15 +8,17 @@ import { projects, type Project } from "./projects";
  * doesn't belong on the Project data model. Projects only describe
  * projects; the homepage decides how to present them.
  *
- * Order here is the source of truth for Featured Work's sequence — it
- * does not depend on projects.ts's own `order` field, which remains a
- * general catalog concern (used by the future Work index) independent
- * of this homepage-specific list.
+ * All five website projects are featured, in the same order as
+ * projects.ts's own `order` field (the general catalog sequence). The
+ * list stays explicit rather than "just render all projects" so a future
+ * homepage-only curation change doesn't require touching projects.ts.
  */
 export const featuredProjectClientIds: ClientId[] = [
   "cybernetix",
   "pixelscape",
   "aureate",
+  "clix",
+  "hihat",
 ];
 
 export function getFeaturedProjects(): Project[] {

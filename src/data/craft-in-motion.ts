@@ -20,18 +20,22 @@ interface CraftInMotionRef {
 }
 
 /**
- * The curated selection. The Content Architecture flagged Friends Perk
- * Cafe as the most video-rich client (four reels, two showreels) and
- * recommended it get real weight here — this list follows that
- * reasoning: one Eternal reel plus two Friends Perk Cafe clips (one
- * reel, one showreel), covering both video clients and both formats.
+ * The curated selection — six of the ten available reel/showreel assets,
+ * split evenly 3/3 between clients and 3/3 between reel/showreel formats:
+ * two Eternal reels + one Eternal showreel, one Friends Perk Cafe reel +
+ * two Friends Perk Cafe showreels. Friends Perk Cafe still gets slightly
+ * more of its showreel (production) side represented, consistent with
+ * the Content Architecture's note that it's the most video-rich client.
  * This is a curation judgment, not a neutral fact — swap freely if a
  * different selection represents the work better.
  */
 const craftInMotionSelection: CraftInMotionRef[] = [
   { type: "reel", id: "eternal-vid-01" },
+  { type: "reel", id: "eternal-vid-02" },
+  { type: "showreel", id: "eternal-vid-03" },
   { type: "reel", id: "friends-perk-cafe-vid-02" },
   { type: "showreel", id: "friends-perk-cafe-vid-01" },
+  { type: "showreel", id: "friends-perk-cafe-vid-04" },
 ];
 
 export function getCraftInMotionMedia(): (Reel | Showreel)[] {
