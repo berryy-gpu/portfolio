@@ -2,129 +2,195 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+  Design Token Specification (Phase 5C.3) implemented here.
+  Single fixed dark theme — no light mode, no toggle (approved Phase 4 / 5B).
+  shadcn's semantic variable names are kept (so generated components like
+  Button work unmodified) but their VALUES are remapped to our own tokens.
+  shadcn's "accent" (hover highlight) and "secondary" (secondary-button fill)
+  are distinct concepts from our brand accent/secondary tokens and are
+  intentionally NOT the same value — see the mapping comments below.
+*/
 
 @theme inline {
+  /* ---- Brand color tokens ---- */
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-overlay: var(--overlay);
   --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
   --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  --color-secondary: var(--secondary-reserved);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  /* ---- shadcn semantic tokens, remapped to the values above ---- */
+  --color-foreground: var(--foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-shadcn: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-shadcn: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* ---- Fonts ---- */
+  --font-heading: "Cabinet Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "General Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-sans: var(--font-body);
+
+  /* ---- Typography scale (11 tiers) ---- */
+  --text-display-xxl: 10rem;
+  --text-display-xxl--line-height: 0.95;
+  --text-display-xl: 7.5rem;
+  --text-display-xl--line-height: 1;
+  --text-display: 5.5rem;
+  --text-display--line-height: 1.05;
+  --text-h1: 4rem;
+  --text-h1--line-height: 1.1;
+  --text-h2: 3rem;
+  --text-h2--line-height: 1.15;
+  --text-h3: 2.25rem;
+  --text-h3--line-height: 1.2;
+  --text-h4: 1.75rem;
+  --text-h4--line-height: 1.3;
+  --text-body-lg: 1.375rem;
+  --text-body-lg--line-height: 1.5;
+  --text-body: 1.125rem;
+  --text-body--line-height: 1.6;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+
+  /* ---- Tracking (letter-spacing) ---- */
+  --tracking-display: -0.02em;
+  --tracking-heading: -0.01em;
+  --tracking-subheading: -0.005em;
+  --tracking-caption: 0.02em;
+
+  /* ---- Spacing scale (named tiers, additive to Tailwind's numeric scale) ---- */
+  --spacing-micro: 0.5rem;
+  --spacing-compact: 1rem;
+  --spacing-comfortable: 2rem;
+  --spacing-generous: 4rem;
+  --spacing-expansive: 8rem;
+  --spacing-cinematic: 16rem;
+
+  /* ---- Radius scale ---- */
+  --radius-none: 0px;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* ---- Shadow scale (deliberately subtle — no heavy shadows) ---- */
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.28);
+  --shadow-strong: 0 16px 32px rgba(0, 0, 0, 0.32);
+  --shadow-glass: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  /* ---- Blur (the two sanctioned glass contexts only) ---- */
+  --blur-functional: 16px;
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  /* Elevation system (Phase 5C.3 §6) */
+  --background: #0b0b0a;
+  --surface: #151412;
+  --surface-elevated: #1e1c18;
+  --overlay: #262420;
+  --border: #2b2924;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Text */
+  --text-primary: #f5f3ee;
+  --text-secondary: #a8a59d;
+  --text-tertiary: #6e6b63;
+
+  /* Brand
+     Accent darkened from the originally specified #B8583F to #A64F39.
+     Measured contrast (Lighthouse) with light foreground text was 4.2:1,
+     below the 4.5:1 AA requirement — the darker value measures ~5:1.
+     Per the Master Design Specification's Decision Hierarchy, Accessibility
+     (level 1) outranks Visual Identity (level 7); this is that rule applied,
+     not a stylistic change. */
+  --accent: #a64f39;
+  --secondary-reserved: #3d5a54;
+
+  /* Status */
+  --success: #7fa37a;
+  --warning: #d97f4c;
+  --error: #c1584b;
+
+  /* shadcn semantic mapping */
+  --foreground: var(--text-primary);
+  --card: var(--surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--overlay);
+  --popover-foreground: var(--text-primary);
+
+  /* Text on a solid accent fill: verified against both light and dark text —
+     light text (text-primary) measured marginally better contrast against
+     our accent terracotta than dark background text did. Re-check with a
+     real contrast tool during Sprint 0 QA; this is a manual approximation. */
+  --primary: var(--accent);
+  --primary-foreground: var(--text-primary);
+
+  /* shadcn "secondary" = a secondary button fill, NOT our brand secondary
+     reserve color. Our reserved teal (#3D5A54) stays rare and deliberate,
+     per Phase 5B — it is never used as a general UI secondary color. */
+  --secondary: var(--surface-elevated);
+  --secondary-foreground: var(--text-primary);
+
+  --muted: var(--surface);
+  --muted-foreground: var(--text-secondary);
+
+  /* shadcn "accent" = subtle hover-state background, NOT our brand accent. */
+  --accent-hover: var(--surface-elevated);
+  --accent-foreground: var(--text-primary);
+
+  --destructive: var(--error);
+  --destructive-foreground: var(--text-primary);
+
+  --border: var(--border);
+  --input: var(--border);
+  --ring: var(--accent);
+
+  --radius: 0.5rem;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-text-primary font-body;
   }
+
   html {
-    @apply font-sans;
+    @apply font-body;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
   }
 }
