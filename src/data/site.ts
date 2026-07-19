@@ -18,6 +18,7 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   name: "Baran Haider",
+  tagline: "I build what ambitious brands grow on.",
   avatar: "/images/profile/me.png",
   socialLinks: [],
 };

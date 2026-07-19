@@ -9,7 +9,10 @@ const widths = {
 } as const;
 
 interface ContainerProps {
-  as?: ElementType;
+  // Constrained to element types that accept className + children — a bare
+  // ElementType includes void elements (e.g. <img>) whose children prop is
+  // `never`, which breaks JSX's children-type inference for this component.
+  as?: ElementType<{ className?: string; children?: ReactNode }>;
   width?: keyof typeof widths;
   className?: string;
   children: ReactNode;
