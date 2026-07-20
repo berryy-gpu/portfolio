@@ -13,8 +13,9 @@ import { getSocialCampaignsByClientId } from "./socialCampaigns";
 export type WorkMediaType = "campaigns" | "motion";
 
 /** The homepage-style explicit ordering: website clients in their
- *  existing catalog order, then the two video-only clients. */
-const workOrder: ClientId[] = [
+ *  existing catalog order, then the two video-only clients. Exported so
+ *  Client Story pages can reuse the same sequence for prev/next nav. */
+export const workOrder: ClientId[] = [
   "cybernetix",
   "pixelscape",
   "aureate",

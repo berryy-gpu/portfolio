@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -19,6 +19,8 @@ export function Navigation() {
   const lenis = useLenis();
   const prefersReducedMotion = useReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     setIsOpen(false);
@@ -27,6 +29,7 @@ export function Navigation() {
   useEffect(() => {
     if (isOpen) {
       lenis?.stop();
+      firstMobileLinkRef.current?.focus();
     } else {
       lenis?.start();
     }
@@ -36,7 +39,10 @@ export function Navigation() {
     if (!isOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsOpen(false);
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        menuButtonRef.current?.focus();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -93,6 +99,7 @@ export function Navigation() {
             </nav>
 
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={() => setIsOpen((open) => !open)}
               aria-expanded={isOpen}
@@ -114,6 +121,9 @@ export function Navigation() {
         {isOpen && (
           <motion.div
             id="mobile-nav"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -122,11 +132,12 @@ export function Navigation() {
             style={{ zIndex: zIndex.navigation }}
           >
             <nav className="flex flex-col gap-6">
-              {mainNav.map((item) => {
+              {mainNav.map((item, index) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
+                    ref={index === 0 ? firstMobileLinkRef : undefined}
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(

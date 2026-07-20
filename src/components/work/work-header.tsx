@@ -48,7 +48,7 @@ export function WorkHeader() {
       </motion.span>
       <motion.h1
         variants={prefersReducedMotion ? undefined : itemVariants}
-        className="font-heading text-display tracking-display text-text-primary md:text-display-xl"
+        className="font-heading text-h1 tracking-heading break-words text-text-primary md:text-display md:tracking-display"
       >
         Creative Showcase
       </motion.h1>

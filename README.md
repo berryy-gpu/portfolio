@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Baran Haider — Portfolio
+
+A premium personal portfolio built with Next.js 15, React 19, and TypeScript — a cinematic homepage, a Creative Showcase, per-client story pages, and editorial About/Services/Contact pages, all sharing one design and motion system.
+
+## Stack
+
+Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui (`@base-ui/react`) · GSAP + ScrollTrigger · Lenis · Framer Motion · React Three Fiber · React Hook Form + Zod · Resend.
+
+See `CLAUDE.md` for the full architecture reference.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+npm run build    # production build (also typechecks)
+npm run start    # serve the production build
+npm run lint     # ESLint
+npx tsc --noEmit # typecheck only
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and fill in the real values:
 
-## Learn More
+```bash
+cp .env.example .env.local
+```
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Required | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_SITE_URL` | No, but recommended once deployed | Canonical absolute URL used for `metadataBase`, the sitemap, `robots.txt`, and JSON-LD/Open Graph image URLs. Falls back to `http://localhost:3000`. |
+| `RESEND_API_KEY` | Yes, in production | Sends the contact form's notification email via [Resend](https://resend.com). Without it, `/api/contact` returns a 500 and the form shows an error state — it fails safely, it just won't send. |
+| `RESEND_FROM_EMAIL` | No | Sender address for outgoing mail. Must be on a domain verified in Resend to send at real volume. Defaults to Resend's `onboarding@resend.dev` sandbox sender, which works without domain verification but is meant for testing. |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The contact form's recipient address is not an environment variable — it's `siteConfig.email` in `src/data/site.ts`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Deploys cleanly to Vercel (or any Next.js-compatible host) with zero extra configuration beyond the environment variables above.
+- Set `RESEND_API_KEY` (and, once you have a verified sending domain, `RESEND_FROM_EMAIL`) in your host's environment variable settings — never commit real values to `.env.local` or anywhere else in the repo.
+- `/work/[clientId]` is statically generated at build time via `generateStaticParams` — no server-side data fetching, no database.
+- Set `NEXT_PUBLIC_SITE_URL` to the real production domain once known — it drives `metadataBase`, the sitemap, `robots.txt`, and Open Graph image URLs.

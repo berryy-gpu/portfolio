@@ -110,7 +110,7 @@ export function Hero() {
             </span>
           </motion.div>
 
-          <h1 className="font-heading text-h1 tracking-heading text-text-primary md:text-display md:tracking-display">
+          <h1 className="font-heading text-h1 tracking-heading break-words text-text-primary md:text-display md:tracking-display">
             {words.map((word, index) => (
               <span
                 key={`${word}-${index}`}

@@ -5,15 +5,47 @@ import "./globals.css";
 import { Footer } from "@/components/layout/footer";
 import { Navigation } from "@/components/layout/navigation";
 import { Providers } from "@/components/providers/providers";
+import { siteConfig } from "@/data/site";
+import { siteUrl } from "@/lib/site-url";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
+const defaultTitle = `${siteConfig.name} — ${siteConfig.tagline}`;
+const defaultDescription = siteConfig.tagline ?? siteConfig.name;
+
 export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Personal portfolio",
+  metadataBase: new URL(siteUrl),
+  title: { default: defaultTitle, template: `%s — ${siteConfig.name}` },
+  description: defaultDescription,
+  openGraph: {
+    title: defaultTitle,
+    description: defaultDescription,
+    siteName: siteConfig.name,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+  },
+};
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: siteConfig.name,
+  url: siteUrl,
+  image: `${siteUrl}${siteConfig.avatar}`,
+  ...(siteConfig.description && { description: siteConfig.description }),
+  ...(!siteConfig.description &&
+    siteConfig.tagline && { description: siteConfig.tagline }),
+  ...(siteConfig.email && { email: siteConfig.email }),
+  ...(siteConfig.socialLinks.length > 0 && {
+    sameAs: siteConfig.socialLinks.map((link) => link.url),
+  }),
 };
 
 export default function RootLayout({
@@ -31,6 +63,10 @@ export default function RootLayout({
         <link
           rel="stylesheet"
           href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@300,400,500,700&f[]=general-sans@300,400,500,600,700&display=swap"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
       </head>
       <body className="min-h-full flex flex-col">

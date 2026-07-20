@@ -37,7 +37,7 @@ export function HomepageCta() {
     >
       <p
         data-reveal="cta-content"
-        className="font-heading text-h1 tracking-heading text-text-primary md:text-display md:tracking-display"
+        className="font-heading text-h1 tracking-heading break-words text-text-primary md:text-display md:tracking-display"
       >
         {homepageCtaConfig.message}
       </p>

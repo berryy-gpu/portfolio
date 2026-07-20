@@ -6,11 +6,12 @@ import { CursorSpotlight } from "@/components/work/cursor-spotlight";
 import { WorkAmbientBackground } from "@/components/work/work-ambient-background";
 import { WorkExperience } from "@/components/work/work-experience";
 import { WorkHeader } from "@/components/work/work-header";
-import { siteConfig } from "@/data/site";
+
+import { workDescription } from "./page-meta";
 
 export const metadata: Metadata = {
-  title: `Creative Showcase — ${siteConfig.name}`,
-  description: `Campaigns, motion design, and client stories by ${siteConfig.name} — the creative range behind the work.`,
+  title: "Creative Showcase",
+  description: workDescription,
 };
 
 export default function WorkPage() {

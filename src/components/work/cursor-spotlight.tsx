@@ -20,6 +20,12 @@
  * `(hover: hover) and (pointer: fine)` gate) and skipped entirely under
  * prefers-reduced-motion, since it's pure decoration with zero
  * functional purpose for anyone who'd rather not see it move.
+ *
+ * The wrapper needs `overflow-hidden` (matching WorkAmbientBackground) —
+ * without it, the 512px glow sits at the viewport's top-left corner
+ * before the first pointermove and genuinely overflows any viewport
+ * narrower than that, contributing real horizontal scroll, not just a
+ * visual clip issue.
  */
 
 import { useEffect, useRef, type CSSProperties } from "react";
@@ -74,7 +80,7 @@ export function CursorSpotlight() {
           "--spotlight-opacity": 0,
         } as CSSProperties
       }
-      className="pointer-events-none fixed inset-0 -z-10 opacity-(--spotlight-opacity) transition-opacity duration-500"
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden opacity-(--spotlight-opacity) transition-opacity duration-500"
     >
       <div
         className="absolute top-0 left-0 h-[32rem] w-[32rem] rounded-full bg-accent/[0.05] blur-3xl will-change-transform"
