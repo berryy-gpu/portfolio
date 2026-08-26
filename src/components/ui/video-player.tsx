@@ -66,7 +66,7 @@ export function VideoPlayer({
         muted={isMuted}
         loop
         playsInline
-        preload="metadata"
+        preload="none"
         aria-label={title}
         className="h-full w-full object-cover"
       />

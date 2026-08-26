@@ -1,34 +1,33 @@
 "use client";
 
 /**
- * One service's problem → approach → outcome → relevant work → CTA.
- * Rendered once per real service (services.ts), in catalog order.
- * Relevant-work chips only render when real client work actually
- * touches this service's categories — several services (SEO, AI
- * Automation) currently have none, and that's shown by omission, not a
- * "coming soon" placeholder.
+ * One service's problem -> approach -> outcome -> relevant work -> CTA,
+ * as a tall editorial section with alternating alignment (image/text
+ * sides swap by index) and a real image where one exists
+ * (services.ts's previewImage — only web-development and
+ * social-media-marketing have one; others render text-only rather than
+ * an invented image). `id={service.id}` makes this a real anchor target
+ * for links like the homepage Capabilities section's `/services#id`.
  */
 
+import Image from "next/image";
 import Link from "next/link";
 
 import type { Client } from "@/data/clients";
 import type { ServiceDetail } from "@/data/service-detail";
+import type { Service } from "@/data/services";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { duration, gsapEasing } from "@/lib/motion-tokens";
+import { cn } from "@/lib/utils";
 
 interface ServiceBlockProps {
   index: number;
-  title: string;
+  service: Service;
   detail: ServiceDetail;
   relevantClients: Client[];
 }
 
-export function ServiceBlock({
-  index,
-  title,
-  detail,
-  relevantClients,
-}: ServiceBlockProps) {
+export function ServiceBlock({ index, service, detail, relevantClients }: ServiceBlockProps) {
   const containerRef = useScrollReveal<HTMLDivElement>({
     selector: "[data-reveal='service-block']",
     duration: duration.slow,
@@ -36,25 +35,31 @@ export function ServiceBlock({
     y: 20,
   });
 
+  const isReversed = index % 2 === 1;
+
   return (
     <div
+      id={service.id}
       ref={containerRef}
-      className="border-b border-border py-expansive last:border-b-0 md:py-cinematic"
+      className="scroll-mt-24 border-b border-border py-expansive last:border-b-0 md:py-cinematic"
     >
       <div
         data-reveal="service-block"
-        className="flex flex-col gap-8 md:flex-row md:gap-16"
+        className={cn(
+          "flex flex-col gap-10 md:flex-row md:gap-16",
+          isReversed && "md:flex-row-reverse"
+        )}
       >
-        <div className="shrink-0 md:w-[28rem]">
-          <span className="font-mono text-caption tracking-caption text-text-tertiary">
-            {String(index + 1).padStart(2, "0")}
-          </span>
-          <h2 className="mt-2 break-words font-heading text-h2 text-text-primary md:text-h1">
-            {title}
-          </h2>
-        </div>
+        <div className="flex flex-1 flex-col gap-6">
+          <div>
+            <span className="font-mono text-caption tracking-caption text-text-tertiary">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <h2 className="mt-2 break-words font-heading text-h1 text-text-primary">
+              {service.title}
+            </h2>
+          </div>
 
-        <div className="flex max-w-2xl flex-col gap-6">
           <p className="text-h3 text-text-primary">{detail.problem}</p>
           <p className="text-body-lg text-text-secondary">{detail.approach}</p>
           <p className="border-l-2 border-accent pl-4 text-body text-text-secondary">
@@ -85,14 +90,23 @@ export function ServiceBlock({
             className="group inline-flex w-fit items-center gap-2 pt-2 text-small text-text-secondary transition-colors hover:text-text-primary focus-visible:text-text-primary focus-visible:outline-none"
           >
             Talk about this
-            <span
-              aria-hidden="true"
-              className="transition-transform group-hover:translate-x-1"
-            >
+            <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
               →
             </span>
           </Link>
         </div>
+
+        {service.previewImage && (
+          <div className="relative aspect-4/3 w-full shrink-0 overflow-hidden rounded-lg border border-border bg-surface md:w-[28rem]">
+            <Image
+              src={service.previewImage.src}
+              alt={service.previewImage.alt}
+              fill
+              sizes="(min-width: 768px) 448px, 100vw"
+              className="object-cover"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

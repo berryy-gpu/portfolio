@@ -1,21 +1,16 @@
 "use client";
 
 /**
- * The entire Contact page in one calm, centered block — no ambient
- * glow, no scroll-triggered reveals, deliberately less atmosphere than
- * every other page. "Zero distractions" meant treating restraint itself
- * as this page's personality rather than giving it its own mood layer.
- * One entrance animation (fade + rise), same as every other page's
- * intro, then nothing else moves.
- *
- * The actual submission (ContactForm) is a real form posting to
- * /api/contact — no mailto:, see contact-form.tsx.
+ * REBUILD-SPEC.md /contact: split layout, form left, large type right at
+ * display-xl. One entrance animation (fade + rise), same as every other
+ * page's intro, then nothing else moves — this page still deliberately
+ * carries less atmosphere than the rest of the site.
  */
 
 import { motion, useReducedMotion } from "framer-motion";
 
-import { Container } from "@/components/ui/container";
 import { ContactForm } from "@/components/contact/contact-form";
+import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/data/site";
 import { easing } from "@/lib/motion-tokens";
 
@@ -41,40 +36,31 @@ export function ContactContent() {
   }
 
   return (
-    <section className="flex min-h-[70vh] flex-col items-center justify-center py-expansive md:py-cinematic">
-      <Container width="reading">
+    <section className="flex min-h-[80vh] flex-col justify-center py-expansive md:py-cinematic">
+      <Container>
         <motion.div
           initial={prefersReducedMotion ? undefined : "hidden"}
           animate="visible"
           variants={prefersReducedMotion ? undefined : containerVariants}
-          className="flex flex-col items-center gap-8 text-center"
+          className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center lg:gap-24"
         >
-          <motion.span
-            variants={prefersReducedMotion ? undefined : itemVariants}
-            className="text-caption tracking-caption text-text-secondary"
-          >
-            Contact
-          </motion.span>
-
-          <motion.h1
-            variants={prefersReducedMotion ? undefined : itemVariants}
-            className="font-heading text-h1 tracking-heading break-words text-text-primary md:text-display"
-          >
-            Let&apos;s talk about your project.
-          </motion.h1>
-
-          <motion.p
-            variants={prefersReducedMotion ? undefined : itemVariants}
-            className="text-body-lg text-text-secondary"
-          >
-            Tell me what you&apos;re building — I&apos;ll get back to you.
-          </motion.p>
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <ContactForm />
+          </motion.div>
 
           <motion.div
             variants={prefersReducedMotion ? undefined : itemVariants}
-            className="flex w-full justify-center"
+            className="flex flex-col gap-6 lg:order-first"
           >
-            <ContactForm />
+            <span className="font-mono text-caption tracking-caption text-text-secondary uppercase">
+              Contact
+            </span>
+            <h1 className="font-heading text-display-xl tracking-display text-text-primary break-words">
+              Let&apos;s talk about your project.
+            </h1>
+            <p className="max-w-md text-body-lg text-text-secondary">
+              Tell me what you&apos;re building — I&apos;ll get back to you.
+            </p>
           </motion.div>
         </motion.div>
       </Container>

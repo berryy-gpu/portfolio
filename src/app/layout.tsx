@@ -4,6 +4,10 @@ import "./globals.css";
 
 import { Footer } from "@/components/layout/footer";
 import { Navigation } from "@/components/layout/navigation";
+import { PageTransition } from "@/components/layout/page-transition";
+import { Preloader } from "@/components/layout/preloader";
+import { ScrollProgress } from "@/components/layout/scroll-progress";
+import { SoundToggle } from "@/components/layout/sound-toggle";
 import { Providers } from "@/components/providers/providers";
 import { siteConfig } from "@/data/site";
 import { siteUrl } from "@/lib/site-url";
@@ -77,8 +81,17 @@ export default function RootLayout({
           Skip to content
         </a>
         <Providers>
+          <Preloader />
+          <PageTransition />
+          <ScrollProgress />
+          <SoundToggle />
           <Navigation />
-          <main id="main-content" className="flex flex-1 flex-col">
+          {/* Navigation is fixed (transparent at scroll 0), so ordinary
+              pages need this top offset to clear it. The one exception is
+              a full-bleed hero section that WANTS the nav floating over
+              it — that section cancels this out itself (e.g. -mt-16)
+              rather than this padding being conditional here. */}
+          <main id="main-content" className="flex flex-1 flex-col pt-16">
             {children}
           </main>
           <Footer />

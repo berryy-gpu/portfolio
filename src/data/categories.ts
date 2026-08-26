@@ -9,6 +9,7 @@ export const CATEGORY_IDS = [
   "video-production",
   "seo",
   "ai-automation",
+  "web-care",
 ] as const;
 
 export type CategoryId = (typeof CATEGORY_IDS)[number];
@@ -29,6 +30,7 @@ export const categories: Category[] = [
   { id: "video-production", label: "Video Production" },
   { id: "seo", label: "SEO" },
   { id: "ai-automation", label: "AI Automation" },
+  { id: "web-care", label: "Website Care" },
 ];
 
 export function getCategoryById(id: CategoryId): Category | undefined {

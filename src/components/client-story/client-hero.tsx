@@ -1,89 +1,90 @@
 "use client";
 
 /**
- * The Client Story's cinematic intro — same bespoke big-type/staggered-
- * entrance pattern as the Work page's WorkHeader, so both "discovery"
- * pages share a visual language, adapted here with the client's name as
- * the dominant element and their real domain/services as supporting
- * facts, not marketing copy.
+ * REBUILD-SPEC.md /work/[clientId] hero: client logo + name at
+ * display-xxl, one full-bleed image with clipReveal, meta row. Only real
+ * facts in the meta row — services and the live domain (both derived
+ * from story data); no invented "year"/"role" fields, which don't exist
+ * anywhere in the data layer.
  */
 
-import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 
+import { RevealImage } from "@/components/motion/reveal-image";
 import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/ui/container";
-import { getCategoryById } from "@/data/categories";
+import { ImageCaption } from "@/components/ui/image-caption";
+import { getClientLogoDimensions, getClientLogoPath } from "@/data/clients";
 import type { ClientStoryDetail } from "@/data/client-story";
-import { easing } from "@/lib/motion-tokens";
-
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.12 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: easing.hero },
-  },
-};
+import { ENGAGEMENT_LABELS, getClientEngagement } from "@/data/projects";
 
 interface ClientHeroProps {
   story: ClientStoryDetail;
 }
 
 export function ClientHero({ story }: ClientHeroProps) {
-  const prefersReducedMotion = useReducedMotion();
   const domain = story.project?.websitePreview?.domain;
+  const heroImage = story.project?.websitePreview?.image ?? story.project?.images[0];
+  // Captions only exist on ProjectImage, not WebsitePreviewImage — only
+  // possible when the hero fell back to the plain images[0] path.
+  const heroImageCaption = story.project?.websitePreview ? undefined : story.project?.images[0]?.caption;
+  const logo = getClientLogoPath(story.client.id, "color");
+  const logoDimensions = getClientLogoDimensions(story.client.id);
+  const engagement = getClientEngagement(story.client.id);
 
   return (
-    <section className="py-generous md:py-expansive">
-      <Container>
-        <motion.div
-          initial={prefersReducedMotion ? undefined : "hidden"}
-          animate="visible"
-          variants={prefersReducedMotion ? undefined : containerVariants}
-          className="flex max-w-4xl flex-col gap-4"
-        >
-          <motion.span
-            variants={prefersReducedMotion ? undefined : itemVariants}
-            className="text-caption tracking-caption text-text-secondary"
-          >
-            {story.atmosphere.mood}
-          </motion.span>
+    <section className="flex flex-col gap-10 py-generous md:py-expansive">
+      <Container className="flex flex-col gap-6">
+        {logo && logoDimensions && (
+          <Image
+            src={logo}
+            alt={story.client.name}
+            width={logoDimensions.width}
+            height={logoDimensions.height}
+            className="h-10 w-auto object-contain"
+          />
+        )}
 
-          <motion.h1
-            variants={prefersReducedMotion ? undefined : itemVariants}
-            className="font-heading text-h1 tracking-heading break-words text-text-primary md:text-display md:tracking-display"
-          >
-            {story.client.name}
-          </motion.h1>
+        <h1 className="font-heading text-display-xxl tracking-display text-text-primary">
+          {story.client.name}
+        </h1>
 
+        <div className="flex flex-wrap items-center gap-4">
+          {engagement && (
+            <Badge className="border-accent/40 text-accent">
+              {ENGAGEMENT_LABELS[engagement]}
+            </Badge>
+          )}
+          {story.services.map((service) => (
+            <Badge key={service.id}>{service.title}</Badge>
+          ))}
           {domain && (
-            <motion.span
-              variants={prefersReducedMotion ? undefined : itemVariants}
-              className="font-mono text-small text-text-secondary"
+            <a
+              href={`https://${domain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-caption tracking-caption text-accent uppercase transition-colors hover:text-text-primary"
             >
-              {domain}
-            </motion.span>
+              {domain} ↗
+            </a>
           )}
-
-          {story.categoryIds.length > 0 && (
-            <motion.div
-              variants={prefersReducedMotion ? undefined : itemVariants}
-              className="flex flex-wrap gap-2 pt-2"
-            >
-              {story.categoryIds.map((categoryId) => {
-                const category = getCategoryById(categoryId);
-                if (!category) return null;
-                return <Badge key={categoryId}>{category.label}</Badge>;
-              })}
-            </motion.div>
-          )}
-        </motion.div>
+        </div>
       </Container>
+
+      {heroImage && (
+        <>
+          <RevealImage
+            src={heroImage.src}
+            alt={heroImage.alt}
+            fill
+            sizes="100vw"
+            containerClassName="relative aspect-video w-full"
+          />
+          <Container>
+            <ImageCaption index={0} caption={heroImageCaption} />
+          </Container>
+        </>
+      )}
     </section>
   );
 }

@@ -15,15 +15,21 @@ export const metadata: Metadata = {
   description: aboutDescription,
 };
 
+/**
+ * FIX 4 order — Tools moved directly after Story so the marquee breaks
+ * up the text run instead of arriving after four consecutive text
+ * sections: Statement -> Story -> Tools -> Timeline -> Philosophy ->
+ * Enjoys -> CTA.
+ */
 export default function AboutPage() {
   return (
     <>
       <AboutStatement />
       <AboutStory />
+      <AboutTools />
       <AboutTimeline />
       <AboutPhilosophy />
       <AboutEnjoys />
-      <AboutTools />
       <AboutCta />
     </>
   );

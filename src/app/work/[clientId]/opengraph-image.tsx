@@ -32,6 +32,8 @@ export default async function Image({ params }: OgImageProps) {
   return renderOgImage({
     title: story.client.name,
     subtitle: getClientStoryDescription(story),
-    accent: story.atmosphere.accent,
+    // Real, verified per-client colour when one exists; the site's own
+    // real --accent token otherwise — never a guessed brand colour.
+    accent: story.atmosphere?.accent ?? "#a64f39",
   });
 }

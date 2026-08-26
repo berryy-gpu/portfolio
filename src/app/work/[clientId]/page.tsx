@@ -2,25 +2,27 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ClientAmbientGlow } from "@/components/client-story/client-ambient-glow";
+import { ClientCaseStudyBody } from "@/components/client-story/client-case-study-body";
 import { ClientHero } from "@/components/client-story/client-hero";
 import { ClientMotionShowcase } from "@/components/client-story/client-motion-showcase";
-import { ClientProcess } from "@/components/client-story/client-process";
+import { ClientNextProject } from "@/components/client-story/client-next-project";
+import { ClientSidebar } from "@/components/client-story/client-sidebar";
 import { ClientSocialGallery } from "@/components/client-story/client-social-gallery";
-import { ClientStoryNav } from "@/components/client-story/client-story-nav";
-import { ClientWebsiteShowcase } from "@/components/client-story/client-website-showcase";
+import { ClientTestimonial } from "@/components/client-story/client-testimonial";
+import { Container } from "@/components/ui/container";
+import { getCaseStudyByClientId } from "@/data/case-studies";
+import { getClientSectionCopy } from "@/data/client-presentation";
 import {
   getAdjacentClientIds,
   getAllClientIds,
   getClientStoryDescription,
   getClientStoryDetail,
-  type ClientStoryDetail,
 } from "@/data/client-story";
-import {
-  getClientSectionCopy,
-  getClientSectionEmphasis,
-  getClientSectionOrder,
-  type ClientSectionId,
-} from "@/data/client-presentation";
+
+/** The site's own real accent token — the fallback for clients with no
+ *  researched/approved atmosphere entry (client-atmosphere.ts), never a
+ *  guessed brand colour. */
+const DEFAULT_ACCENT = "#a64f39";
 
 interface ClientStoryPageProps {
   params: Promise<{ clientId: string }>;
@@ -43,50 +45,25 @@ export async function generateMetadata({
   };
 }
 
-/** Renders one content section, or null if this client has no data for
- *  it — the section-order/copy config decides HOW, the story data
- *  decides WHETHER. */
-function renderSection(sectionId: ClientSectionId, story: ClientStoryDetail) {
-  const clientId = story.client.id;
-  const copy = getClientSectionCopy(clientId, sectionId);
-
-  switch (sectionId) {
-    case "website":
-      return story.project ? (
-        <ClientWebsiteShowcase
-          key={sectionId}
-          project={story.project}
-          copy={copy}
-          emphasis={getClientSectionEmphasis(clientId, sectionId)}
-        />
-      ) : null;
-    case "social":
-      return story.socialCampaign ? (
-        <ClientSocialGallery
-          key={sectionId}
-          campaign={story.socialCampaign}
-          copy={copy}
-        />
-      ) : null;
-    case "motion":
-      return story.reels.length > 0 || story.showreels.length > 0 ? (
-        <ClientMotionShowcase
-          key={sectionId}
-          reels={story.reels}
-          showreels={story.showreels}
-          copy={copy}
-        />
-      ) : null;
-    case "process":
-      return <ClientProcess key={sectionId} copy={copy} />;
-    default:
-      return null;
-  }
-}
-
-export default async function ClientStoryPage({
-  params,
-}: ClientStoryPageProps) {
+/**
+ * Clients read exactly one case study before deciding — structured as an
+ * article: Hero, sticky-sidebar + brief/approach/outcome body, a
+ * testimonial pull-quote (omitted if none), the social gallery, a video
+ * section for video-only clients, then the next-project block.
+ *
+ * "Has a real website project" (screenshots to show) and "has real
+ * case-study prose" (case-studies.ts) are independent facts, not the
+ * same thing — a client can have one without the other. Three real
+ * states, not two:
+ *   - Neither (friends-perk-cafe): gallery-only variant, no empty
+ *     article shell built around missing content.
+ *   - Project but no case-study prose (ay-architects, for now — see
+ *     REBUILD-AUDIT.md): Hero + Sidebar render with the real images,
+ *     the case-study body just doesn't — never invented brief/approach/
+ *     outcome text standing in for it.
+ *   - Both: the full article.
+ */
+export default async function ClientStoryPage({ params }: ClientStoryPageProps) {
   const { clientId } = await params;
   const story = getClientStoryDetail(clientId);
 
@@ -94,15 +71,61 @@ export default async function ClientStoryPage({
     notFound();
   }
 
-  const { prev, next } = getAdjacentClientIds(story.client.id);
-  const sectionOrder = getClientSectionOrder(story.client.id);
+  const { next } = getAdjacentClientIds(story.client.id);
+  const caseStudy = getCaseStudyByClientId(story.client.id);
+  const socialCopy = getClientSectionCopy(story.client.id, "social");
+  const motionCopy = getClientSectionCopy(story.client.id, "motion");
+  const hasMotion = story.reels.length > 0 || story.showreels.length > 0;
+  const accent = story.atmosphere?.accent ?? DEFAULT_ACCENT;
+
+  if (!story.project && !caseStudy) {
+    return (
+      <>
+        <ClientAmbientGlow color={accent} />
+        <Container className="flex flex-col gap-4 py-generous md:py-expansive">
+          {story.atmosphere?.mood && (
+            <span className="font-mono text-caption tracking-caption text-text-tertiary uppercase">
+              {story.atmosphere.mood}
+            </span>
+          )}
+          <h1 className="font-heading text-display-xl tracking-display text-text-primary">
+            {story.client.name}
+          </h1>
+        </Container>
+
+        {story.socialCampaign && (
+          <ClientSocialGallery campaign={story.socialCampaign} copy={socialCopy} />
+        )}
+        {hasMotion && (
+          <ClientMotionShowcase reels={story.reels} showreels={story.showreels} copy={motionCopy} />
+        )}
+        <ClientNextProject nextId={next} />
+      </>
+    );
+  }
 
   return (
     <>
-      <ClientAmbientGlow color={story.atmosphere.accent} />
+      <ClientAmbientGlow color={accent} />
       <ClientHero story={story} />
-      {sectionOrder.map((sectionId) => renderSection(sectionId, story))}
-      <ClientStoryNav prevId={prev} nextId={next} />
+
+      {(story.services.length > 0 || caseStudy) && (
+        <Container className="grid grid-cols-1 gap-12 lg:grid-cols-[240px_1fr]">
+          <ClientSidebar story={story} />
+          {caseStudy && <ClientCaseStudyBody caseStudy={caseStudy} project={story.project} />}
+        </Container>
+      )}
+
+      <ClientTestimonial clientId={story.client.id} />
+
+      {story.socialCampaign && (
+        <ClientSocialGallery campaign={story.socialCampaign} copy={socialCopy} />
+      )}
+      {hasMotion && (
+        <ClientMotionShowcase reels={story.reels} showreels={story.showreels} copy={motionCopy} />
+      )}
+
+      <ClientNextProject nextId={next} />
     </>
   );
 }

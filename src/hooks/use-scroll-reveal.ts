@@ -1,6 +1,7 @@
 import { useRef } from "react";
 
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { revealPresets, type RevealPreset } from "@/lib/reveal-presets";
 import { useIsomorphicLayoutEffect } from "./use-isomorphic-layout-effect";
 
 interface ScrollRevealOptions {
@@ -10,6 +11,15 @@ interface ScrollRevealOptions {
   ease?: string;
   y?: number;
   stagger?: number;
+  /**
+   * Seed duration/ease/y/stagger from a named reveal-presets.ts grammar —
+   * any of the explicit params above still override it. Existing callers
+   * that don't pass this (e.g. FeaturedWork) are unaffected: their
+   * explicit values always win, and the hook's original hardcoded
+   * defaults (0.5 / power2.out / 24 / 0.1) still apply when neither a
+   * preset nor an explicit value is given.
+   */
+  preset?: RevealPreset;
 }
 
 /**
@@ -44,11 +54,18 @@ interface ScrollRevealOptions {
  */
 export function useScrollReveal<T extends HTMLElement>({
   selector,
-  duration = 0.5,
-  ease = "power2.out",
-  y = 24,
-  stagger = 0.1,
+  duration,
+  ease,
+  y,
+  stagger,
+  preset,
 }: ScrollRevealOptions) {
+  const presetConfig = preset ? revealPresets[preset] : undefined;
+  const resolvedDuration = duration ?? presetConfig?.duration ?? 0.5;
+  const resolvedEase = ease ?? presetConfig?.ease ?? "power2.out";
+  const resolvedY = y ?? presetConfig?.yPercent ?? 24;
+  const resolvedStagger = stagger ?? presetConfig?.stagger ?? 0.1;
+
   const containerRef = useRef<T>(null);
 
   useIsomorphicLayoutEffect(() => {
@@ -72,7 +89,7 @@ export function useScrollReveal<T extends HTMLElement>({
           return;
         }
 
-        gsap.set(elements, { opacity: 0, y });
+        gsap.set(elements, { opacity: 0, y: resolvedY });
 
         ScrollTrigger.batch(elements, {
           start: "top 85%",
@@ -81,9 +98,9 @@ export function useScrollReveal<T extends HTMLElement>({
             gsap.to(batch, {
               opacity: 1,
               y: 0,
-              duration,
-              ease,
-              stagger,
+              duration: resolvedDuration,
+              ease: resolvedEase,
+              stagger: resolvedStagger,
               overwrite: true,
             }),
         });
@@ -91,7 +108,7 @@ export function useScrollReveal<T extends HTMLElement>({
     );
 
     return () => mm.revert();
-  }, [selector, duration, ease, y, stagger]);
+  }, [selector, resolvedDuration, resolvedEase, resolvedY, resolvedStagger]);
 
   return containerRef;
 }

@@ -15,7 +15,10 @@ import { getServicesForCategories } from "@/lib/get-services-for-categories";
 
 export interface ClientStoryDetail {
   client: Client;
-  atmosphere: ClientAtmosphere;
+  /** Undefined for clients with no researched/approved atmosphere entry
+   *  — see client-atmosphere.ts. Consumers fall back to the real
+   *  --accent token, never a guessed brand colour. */
+  atmosphere: ClientAtmosphere | undefined;
   /** A client's real website project, if they have one. */
   project?: Project;
   /** A client's real social campaign, if they have one. */

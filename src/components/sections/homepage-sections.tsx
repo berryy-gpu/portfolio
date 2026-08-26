@@ -1,13 +1,17 @@
 import type { ComponentType } from "react";
 
-import { ClientTrustStrip } from "./client-trust-strip";
-import { CraftInMotion } from "./craft-in-motion";
+import { Capabilities } from "./capabilities";
+import { ClientMarquee } from "./client-marquee";
+import { ClientsWorldwide } from "./clients-worldwide";
+import { Cta } from "./cta";
 import { FeaturedWork } from "./featured-work";
-import { FromIdeaToImpact } from "./from-idea-to-impact";
 import { Hero } from "./hero";
-import { HomepageCta } from "./homepage-cta";
-import { ServicesOverview } from "./services-overview";
-import { WhatICanHelpYouBuild } from "./what-i-can-help-you-build";
+import { Industries } from "./industries";
+import { MotionReel } from "./motion-reel";
+import { Process } from "./process";
+import { Statement } from "./statement";
+import { Stats } from "./stats";
+import { Testimonials } from "./testimonials";
 
 export interface HomepageSection {
   id: string;
@@ -24,14 +28,23 @@ export interface HomepageSection {
  * function names (Component.name) aren't guaranteed unique or stable
  * (minification, HMR, refactors can all change them), so they're never
  * safe to use as a key.
+ *
+ * This is REBUILD-SPEC.md's complete 10-section homepage order (Footer,
+ * section 11, is global chrome in layout.tsx, not here) — all of it now
+ * built across Phases 6-8. featured-work is FROZEN (byte-identical to
+ * before the rebuild); everything else here is new.
  */
 export const homepageSections: HomepageSection[] = [
   { id: "hero", component: Hero },
-  { id: "services", component: ServicesOverview },
+  { id: "statement", component: Statement },
+  { id: "client-marquee", component: ClientMarquee },
   { id: "featured-work", component: FeaturedWork },
-  { id: "craft-in-motion", component: CraftInMotion },
-  { id: "from-idea-to-impact", component: FromIdeaToImpact },
-  { id: "what-i-can-help-you-build", component: WhatICanHelpYouBuild },
-  { id: "client-trust-strip", component: ClientTrustStrip },
-  { id: "homepage-cta", component: HomepageCta },
+  { id: "capabilities", component: Capabilities },
+  { id: "industries", component: Industries },
+  { id: "motion-reel", component: MotionReel },
+  { id: "process", component: Process },
+  { id: "stats", component: Stats },
+  { id: "clients-worldwide", component: ClientsWorldwide },
+  { id: "testimonials", component: Testimonials },
+  { id: "cta", component: Cta },
 ];

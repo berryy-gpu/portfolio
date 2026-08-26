@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 
+import { Process } from "@/components/sections/process";
 import { Container } from "@/components/ui/container";
+import { Faq } from "@/components/services/faq";
 import { ServiceBlock } from "@/components/services/service-block";
 import { ServicesCta } from "@/components/services/services-cta";
 import { ServicesHero } from "@/components/services/services-hero";
+import { TechStack } from "@/components/services/tech-stack";
 import { getServiceDetail, getRelevantClients } from "@/data/service-detail";
 import { services } from "@/data/services";
 
@@ -32,7 +35,7 @@ export default function ServicesPage() {
               <ServiceBlock
                 key={service.id}
                 index={index}
-                title={service.title}
+                service={service}
                 detail={detail}
                 relevantClients={getRelevantClients(service.categoryIds)}
               />
@@ -40,6 +43,9 @@ export default function ServicesPage() {
           })}
         </div>
       </Container>
+      <Process />
+      <TechStack />
+      <Faq />
       <ServicesCta />
     </>
   );

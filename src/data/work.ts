@@ -12,15 +12,19 @@ import { getSocialCampaignsByClientId } from "./socialCampaigns";
  *  specific medium. */
 export type WorkMediaType = "campaigns" | "motion";
 
-/** The homepage-style explicit ordering: website clients in their
- *  existing catalog order, then the two video-only clients. Exported so
- *  Client Story pages can reuse the same sequence for prev/next nav. */
+/** The homepage-style explicit ordering: builds first, care second,
+ *  social/video-only clients last. Exported so Client Story pages can
+ *  reuse the same sequence for prev/next nav. */
 export const workOrder: ClientId[] = [
+  "ay-architects",
   "cybernetix",
   "pixelscape",
   "aureate",
   "clix",
   "hihat",
+  "zoe-ministries",
+  "azura",
+  "thompson",
   "eternal",
   "friends-perk-cafe",
 ];
@@ -51,15 +55,22 @@ export interface ClientStory {
 /**
  * A real, honest one-line summary of what a client's work included,
  * assembled from actual counts (projects, social posts, reels,
- * showreels) rather than written marketing copy. Empty for a client
- * with none of these (shouldn't happen given the current roster, but
- * the function stays honest about it rather than assuming).
+ * showreels) rather than written marketing copy.
+ *
+ * "build" and "care" projects produce DIFFERENT lines — a care client
+ * (ongoing development on a site someone else designed and built) must
+ * never read as "Website design & development", which would tell
+ * visitors we designed and built a site we did not.
  */
 function getClientSummaryLine(clientId: ClientId): string {
   const parts: string[] = [];
+  const clientProjects = getProjectsByClientId(clientId);
 
-  if (getProjectsByClientId(clientId).length > 0) {
+  if (clientProjects.some((project) => project.engagement === "build")) {
     parts.push("Website design & development");
+  }
+  if (clientProjects.some((project) => project.engagement === "care")) {
+    parts.push("Ongoing website development");
   }
 
   const socialCount = getSocialCampaignsByClientId(clientId).flatMap(
@@ -97,4 +108,30 @@ export function getClientDisciplineLabels(categoryIds: CategoryId[]): string[] {
   return categoryIds
     .map((id) => getCategoryById(id)?.label)
     .filter((label): label is string => Boolean(label));
+}
+
+export interface ClientPreviewVideo {
+  src: string;
+  poster: string;
+  alt: string;
+}
+
+/**
+ * A real clip to preview on hover for /work's client rows
+ * (REBUILD-SPEC.md 3f) — the client's first reel (preferred, they're cut
+ * for short-form viewing) or first showreel, posterized with the
+ * client's first real social image. Only clients with real reel/showreel
+ * assets have one; everyone else gets undefined rather than a borrowed
+ * clip standing in for content that doesn't exist.
+ */
+export function getClientPreviewVideo(clientId: ClientId): ClientPreviewVideo | undefined {
+  const clip = getReelsByClientId(clientId)[0] ?? getShowreelsByClientId(clientId)[0];
+  if (!clip) return undefined;
+
+  const posterImage = getSocialCampaignsByClientId(clientId).flatMap(
+    (campaign) => campaign.images
+  )[0];
+  if (!posterImage) return undefined;
+
+  return { src: clip.src, poster: encodeURI(posterImage.src), alt: clip.title };
 }

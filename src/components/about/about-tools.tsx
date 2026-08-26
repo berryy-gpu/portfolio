@@ -1,16 +1,12 @@
-"use client";
-
 /**
- * The real tools this site itself is built with — reuses technologies.ts
- * as-is, grouped by category, rather than a separate invented "skills"
- * list.
+ * Tools as a velocity marquee (REBUILD-SPEC.md /about spec) — the real
+ * tools this site itself is built with, reusing technologies.ts as-is.
  */
 
+import { Marquee } from "@/components/motion/marquee";
 import { Badge } from "@/components/ui/badge";
-import { Section } from "@/components/ui/section";
+import { Container } from "@/components/ui/container";
 import { technologies, type TechnologyCategory } from "@/data/technologies";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
-import { duration, gsapEasing } from "@/lib/motion-tokens";
 
 const categoryLabels: Record<TechnologyCategory, string> = {
   framework: "Framework",
@@ -22,34 +18,29 @@ const categoryLabels: Record<TechnologyCategory, string> = {
 };
 
 export function AboutTools() {
-  const containerRef = useScrollReveal<HTMLDivElement>({
-    selector: "[data-reveal='tool-item']",
-    duration: duration.normal,
-    ease: gsapEasing.entrance,
-    stagger: 0.04,
-  });
+  const sorted = [...technologies].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  const sorted = [...technologies].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0)
-  );
+  if (sorted.length === 0) return null;
 
   return (
-    <Section
-      spacing="cinematic"
-      header={{ eyebrow: "Tools", title: "What this site is built with" }}
-    >
-      <div ref={containerRef} className="flex flex-wrap gap-3">
+    <section className="py-expansive md:py-cinematic">
+      <Container className="pb-8">
+        <span className="font-mono text-caption tracking-caption text-text-tertiary uppercase">
+          Tools
+        </span>
+        <h2 className="mt-2 font-heading text-h2 text-text-primary">
+          What this site is built with
+        </h2>
+      </Container>
+
+      <Marquee baseSpeed={30} itemClassName="items-center gap-4 px-4">
         {sorted.map((tech) => (
-          <span key={tech.id} data-reveal="tool-item">
-            <Badge className="px-4 py-2 text-small">
-              {tech.name}
-              <span className="ml-2 text-text-tertiary">
-                {categoryLabels[tech.category]}
-              </span>
-            </Badge>
-          </span>
+          <Badge key={tech.id} className="px-4 py-2 text-small">
+            {tech.name}
+            <span className="ml-2 text-text-tertiary">{categoryLabels[tech.category]}</span>
+          </Badge>
         ))}
-      </div>
-    </Section>
+      </Marquee>
+    </section>
   );
 }

@@ -29,14 +29,14 @@ export function ServicesCta() {
       >
         <p
           data-reveal="services-cta"
-          className="font-heading text-h1 tracking-heading break-words text-text-primary md:text-display md:tracking-display"
+          className="font-heading text-display tracking-display break-words text-text-primary"
         >
           Not sure which one fits? Let&apos;s figure it out together.
         </p>
         <Link
           data-reveal="services-cta"
           href={contactCta.href}
-          className={buttonVariants({ variant: "default", size: "lg" })}
+          className={buttonVariants({ variant: "outline", size: "lg" })}
         >
           {contactCta.label}
         </Link>

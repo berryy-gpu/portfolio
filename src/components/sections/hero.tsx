@@ -1,154 +1,228 @@
 "use client";
 
 /**
- * The site's signature Hero — the homepage's opening scene.
+ * The homepage's opening scene (REBUILD-SPEC.md section 01) — the site's
+ * FIRST of two sanctioned 3D moments (the CTA scene, Phase 8/10, is the
+ * second and final one). Runs on mobile: the WebGL plane still renders
+ * there (dpr already capped to 1 site-wide for coarse pointers by
+ * webgl-provider.tsx), just without postprocessing.
  *
- * Implements the approved Master Design Specification: one coordinated
- * entrance (byline → headline → CTA) using the Hero/Cinematic motion
- * tokens, and the site's single sanctioned Three.js moment (Motion System
- * §11 — Minimal usage). This is intentionally the only significant 3D
- * interaction anywhere on the site.
- *
- * Do not add further Hero animations, effects, or a second 3D moment
- * without first revisiting the approved Motion System and Visual Identity
- * System — "Bold" is deliberately concentrated here, not distributed
- * across the rest of the site.
- *
- * Pure presentation only — all content comes from src/data/hero.ts, which
- * composes shared identity fields from site.ts rather than duplicating
- * them.
+ * Cancels the root layout's `pt-16` nav-clearance padding with `-mt-16`
+ * so the (transparent-at-scroll-0) fixed nav floats over this section
+ * rather than pushing it down — the one section on the site that wants
+ * that.
  */
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { useReducedMotion } from "framer-motion";
 
-import { buttonVariants } from "@/components/ui/button";
-import { Container } from "@/components/ui/container";
+import { Magnetic } from "@/components/motion/magnetic";
+import { SplitTextReveal } from "@/components/motion/split-text";
+import { TransitionLink } from "@/components/layout/transition-link";
+import { LiveClock } from "@/components/ui/live-clock";
+import { useQualityTier } from "@/hooks/use-quality-tier";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useWebglSupported } from "@/hooks/use-webgl-supported";
+import { useIsomorphicLayoutEffect } from "@/hooks/use-isomorphic-layout-effect";
+import { contactCta } from "@/data/navigation";
 import { heroConfig } from "@/data/hero";
-import { easing } from "@/lib/motion-tokens";
+import { siteConfig } from "@/data/site";
+import { gsap } from "@/lib/gsap";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-const HeroScene = dynamic(
-  () => import("@/components/three/hero-scene").then((mod) => mod.HeroScene),
+// Keeps @react-three/* (~150KB) out of the homepage's initial bundle —
+// see hero-view.tsx's own docstring.
+const HeroView = dynamic(
+  () => import("@/components/three/hero-view").then((mod) => mod.HeroView),
   { ssr: false }
 );
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.09,
-      delayChildren: 0.1,
-    },
-  },
-};
+const ACCENT_WORD = "grow";
 
-const bylineVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: easing.hero },
-  },
-};
+function renderTaglineWithAccent(tagline: string, word: string) {
+  const index = tagline.toLowerCase().indexOf(word.toLowerCase());
+  if (index === -1) return tagline;
 
-const wordVariants = {
-  hidden: { y: "100%" },
-  visible: {
-    y: "0%",
-    transition: { duration: 0.6, ease: easing.hero },
-  },
-};
-
-const ctaVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: easing.hero },
-  },
-};
-
-export function Hero() {
-  const prefersReducedMotion = useReducedMotion();
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const showScene = isDesktop && !prefersReducedMotion;
-
-  const words = heroConfig.content.tagline.split(" ").filter(Boolean);
+  const before = tagline.slice(0, index);
+  const match = tagline.slice(index, index + word.length);
+  const after = tagline.slice(index + word.length);
 
   return (
-    <section className="relative flex min-h-screen flex-col justify-center overflow-hidden">
-      {showScene && (
-        <div className="absolute inset-0 z-0" aria-hidden="true">
-          <HeroScene />
+    <>
+      {before}
+      <span className="text-accent">{match}</span>
+      {after}
+    </>
+  );
+}
+
+export function Hero() {
+  const tier = useQualityTier();
+  const isCoarsePointer = useMediaQuery("(pointer: coarse)");
+  const prefersReducedMotion = useReducedMotion();
+  const webglSupported = useWebglSupported();
+  const sectionRef = useRef<HTMLElement>(null);
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const scrollSegmentRef = useRef<HTMLDivElement>(null);
+
+  // Mirrors webgl-provider.tsx's own mount decision — WebGL support and
+  // reduced-motion are the only two things allowed to hide the video
+  // entirely. The quality tier degrades what renders inside it (dpr,
+  // postprocessing — see webgl-provider.tsx / hero-scene.tsx) but must
+  // never be the reason the video disappears; that was the FIX 1 bug.
+  const showWebgl = webglSupported && !prefersReducedMotion;
+
+  useEffect(() => {
+    if (!videoElement) return;
+    videoElement.play().catch(() => {});
+  }, [videoElement]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (prefersReducedMotion) return;
+    const segment = scrollSegmentRef.current;
+    if (!segment) return;
+
+    const tween = gsap.to(segment, {
+      y: 24,
+      duration: 2.4,
+      ease: "power1.inOut",
+      repeat: -1,
+      yoyo: true,
+    });
+
+    return () => {
+      tween.kill();
+    };
+  }, [prefersReducedMotion]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative -mt-16 flex min-h-screen flex-col overflow-hidden pt-16"
+    >
+      {showWebgl ? (
+        <>
+          <video
+            ref={setVideoElement}
+            data-preload-target="hero"
+            className="sr-only"
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster="/images/posters/hero.jpg"
+            aria-hidden="true"
+          >
+            {isCoarsePointer ? (
+              <source src="/videos/hero/hero-mobile.mp4" type="video/mp4" />
+            ) : (
+              <>
+                <source src="/videos/hero/hero-desktop.webm" type="video/webm" />
+                <source src="/videos/hero/hero-desktop.mp4" type="video/mp4" />
+              </>
+            )}
+          </video>
+
+          {videoElement && (
+            <HeroView
+              track={sectionRef as RefObject<HTMLElement>}
+              videoElement={videoElement}
+              tier={tier}
+              isCoarsePointer={isCoarsePointer}
+            />
+          )}
+        </>
+      ) : (
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/images/posters/hero.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            }}
+          />
         </div>
       )}
 
-      <Container className="relative z-10">
-        <motion.div
-          initial={prefersReducedMotion ? undefined : "hidden"}
-          animate="visible"
-          variants={prefersReducedMotion ? undefined : containerVariants}
-          className="flex max-w-4xl flex-col gap-8"
-        >
-          <motion.div
-            variants={prefersReducedMotion ? undefined : bylineVariants}
-            className="flex items-center gap-3"
-          >
-            <Image
-              src={heroConfig.identity.avatar}
-              alt={heroConfig.identity.name}
-              width={32}
-              height={32}
-              className="rounded-full"
-              priority
-            />
-            <span className="text-small text-text-secondary">
-              {heroConfig.identity.name}
-            </span>
-          </motion.div>
-
-          <h1 className="font-heading text-h1 tracking-heading break-words text-text-primary md:text-display md:tracking-display">
-            {words.map((word, index) => (
-              <span
-                key={`${word}-${index}`}
-                className="inline-block overflow-hidden pb-1 align-bottom"
-              >
-                <motion.span
-                  variants={prefersReducedMotion ? undefined : wordVariants}
-                  className="inline-block"
-                >
-                  {word}
-                  {index < words.length - 1 ? " " : ""}
-                </motion.span>
-              </span>
-            ))}
-          </h1>
-
-          <motion.div
-            variants={prefersReducedMotion ? undefined : ctaVariants}
-            className="flex items-center gap-6"
-          >
-            <Link
-              href={heroConfig.cta.href}
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              {heroConfig.cta.label}
-            </Link>
-          </motion.div>
-        </motion.div>
-      </Container>
-
-      <div aria-hidden="true" className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2">
-        {heroConfig.scrollCueLabel ? (
-          <span className="text-caption tracking-caption text-text-secondary">
-            {heroConfig.scrollCueLabel}
+      <div className="relative z-10 flex flex-1 flex-col justify-between px-6 py-8 md:px-10 md:py-10">
+        <div className="inline-flex w-fit items-center gap-2 rounded-pill border border-border bg-surface/50 px-4 py-2 backdrop-blur-functional">
+          <span
+            aria-hidden="true"
+            className="h-1.5 w-1.5 animate-pulse rounded-full bg-success [animation-duration:3s]"
+          />
+          <span className="font-mono text-caption tracking-caption text-text-secondary uppercase">
+            Available for new work
           </span>
-        ) : (
-          <div className="h-10 w-px bg-border" />
-        )}
+        </div>
+
+        <div className="flex max-w-5xl flex-col gap-8">
+          <SplitTextReveal
+            as="h1"
+            preset="maskUp"
+            trigger="mount"
+            className="font-heading text-display-xxl tracking-display text-text-primary"
+          >
+            {renderTaglineWithAccent(heroConfig.content.tagline, ACCENT_WORD)}
+          </SplitTextReveal>
+
+          <div className="flex flex-wrap items-center gap-6">
+            <Magnetic>
+              <TransitionLink
+                href={heroConfig.cta.href}
+                label={heroConfig.cta.label}
+                className={buttonVariants({ variant: "outline", size: "lg" })}
+              >
+                {heroConfig.cta.label}
+              </TransitionLink>
+            </Magnetic>
+            <Magnetic>
+              <TransitionLink
+                href={contactCta.href}
+                label={contactCta.label}
+                className={buttonVariants({ variant: "ghost", size: "lg" })}
+              >
+                {contactCta.label}
+              </TransitionLink>
+            </Magnetic>
+          </div>
+        </div>
+
+        <div className="flex items-end justify-between">
+          {siteConfig.location && (
+            <div className="flex flex-col gap-1 font-mono text-caption tracking-caption text-text-secondary uppercase">
+              <span>{siteConfig.location}</span>
+              <LiveClock className="text-text-tertiary tabular-nums" />
+            </div>
+          )}
+
+          <div
+            aria-hidden="true"
+            className="hidden h-16 w-px overflow-hidden bg-border md:block"
+          >
+            <div ref={scrollSegmentRef} className="h-10 w-px -translate-y-6 bg-accent" />
+          </div>
+
+          <span
+            aria-hidden="true"
+            className={cn(
+              "rotate-90 font-mono text-caption tracking-caption text-text-secondary uppercase"
+            )}
+          >
+            Scroll
+          </span>
+        </div>
       </div>
     </section>
   );

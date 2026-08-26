@@ -45,7 +45,7 @@ export function ServicesHero() {
           </motion.span>
           <motion.h1
             variants={prefersReducedMotion ? undefined : itemVariants}
-            className="font-heading text-h1 tracking-heading break-words text-text-primary md:text-display md:tracking-display"
+            className="font-heading text-display-xl tracking-display break-words text-text-primary"
           >
             How can I help your business?
           </motion.h1>

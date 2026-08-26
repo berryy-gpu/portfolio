@@ -20,6 +20,7 @@ export const siteConfig: SiteConfig = {
   name: "Baran Haider",
   tagline: "I build what ambitious brands grow on.",
   email: "m.baranhaider2018@gmail.com",
+  location: "Lahore, PK",
   avatar: "/images/profile/me.png",
   socialLinks: [],
 };
