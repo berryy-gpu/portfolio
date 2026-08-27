@@ -5,12 +5,13 @@ export interface NavItem {
 
 /**
  * Primary navigation. "Home" is not listed here — the logo/site name
- * serves as the home link. "Reels" is not a standalone item — it's
- * absorbed into /work's category filters. Both per the approved
- * Master Design Specification §5.
+ * serves as the home link. "Gallery" (REBUILD-SPEC.md step 8) holds the
+ * social campaigns and reels that used to live on /work — that page is
+ * websites only now.
  */
 export const mainNav: NavItem[] = [
   { label: "Work", href: "/work" },
+  { label: "Gallery", href: "/gallery" },
   { label: "Services", href: "/services" },
   { label: "About", href: "/about" },
 ];

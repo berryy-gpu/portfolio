@@ -7,11 +7,6 @@ import { getReelsByClientId } from "./reels";
 import { getShowreelsByClientId } from "./showreels";
 import { getSocialCampaignsByClientId } from "./socialCampaigns";
 
-/** The content groups the Work page's filter toggles. Client Stories
- *  and the cinematic intro aren't filterable — everything else is a
- *  specific medium. */
-export type WorkMediaType = "campaigns" | "motion";
-
 /** The homepage-style explicit ordering: builds first, care second,
  *  social/video-only clients last. Exported so Client Story pages can
  *  reuse the same sequence for prev/next nav. */
@@ -102,6 +97,18 @@ export function getClientStories(): ClientStory[] {
       categoryIds: getClientCategoryIds(client.id),
       summaryLine: getClientSummaryLine(client.id),
     }));
+}
+
+/**
+ * /work is websites only (REBUILD-SPEC.md step 8) — clients with no real
+ * website Project (eternal, friends-perk-cafe; social/video-only) belong
+ * on /gallery instead, not on the /work index. Everything else about
+ * ClientStory stays identical; this only narrows which clients qualify.
+ */
+export function getWebsiteClientStories(): ClientStory[] {
+  return getClientStories().filter(
+    (story) => getProjectsByClientId(story.client.id).length > 0
+  );
 }
 
 export function getClientDisciplineLabels(categoryIds: CategoryId[]): string[] {

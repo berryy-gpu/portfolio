@@ -41,7 +41,7 @@ export function ServiceBlock({ index, service, detail, relevantClients }: Servic
     <div
       id={service.id}
       ref={containerRef}
-      className="scroll-mt-24 border-b border-border py-expansive last:border-b-0 md:py-cinematic"
+      className="scroll-mt-24 border-b border-border py-generous last:border-b-0"
     >
       <div
         data-reveal="service-block"

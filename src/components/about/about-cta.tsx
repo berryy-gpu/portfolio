@@ -12,6 +12,7 @@ import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
+import { useSound } from "@/components/providers/sound-provider";
 import { aboutContent } from "@/data/about";
 import { contactCta } from "@/data/navigation";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
@@ -24,6 +25,7 @@ export function AboutCta() {
     ease: gsapEasing.entrance,
     y: 20,
   });
+  const { playClick, playHover } = useSound();
 
   return (
     <Section spacing="cinematic" containerWidth="reading">
@@ -40,6 +42,8 @@ export function AboutCta() {
         <Link
           data-reveal="about-cta"
           href={contactCta.href}
+          onClick={playClick}
+          onPointerEnter={playHover}
           className={buttonVariants({ variant: "outline", size: "lg" })}
         >
           {contactCta.label}

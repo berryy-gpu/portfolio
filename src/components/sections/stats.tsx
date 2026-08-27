@@ -58,7 +58,7 @@ export function Stats() {
   if (stats.length === 0) return null;
 
   return (
-    <section className="border-y border-border py-expansive">
+    <section className="border-y border-border bg-surface py-expansive">
       <Container>
         <div ref={containerRef} className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {stats.map((stat, index) => (

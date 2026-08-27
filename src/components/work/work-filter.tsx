@@ -2,30 +2,33 @@
 
 /**
  * Filter pills with a Framer layoutId indicator sliding between them —
- * REBUILD-SPEC.md's /work spec, replacing the previous underlined-tabs
- * treatment.
+ * REBUILD-SPEC.md's /work spec. Step 8 replaced the old media-type filter
+ * (Campaigns/Motion moved to /gallery) with a build-vs-care filter over
+ * the real `engagement` field, since /work is websites only now.
  */
 
 import { motion, useReducedMotion } from "framer-motion";
 
-import type { WorkMediaType } from "@/data/work";
+import type { Project } from "@/data/projects";
 import { duration, easing } from "@/lib/motion-tokens";
 import { cn } from "@/lib/utils";
 
+export type WorkEngagementFilter = Project["engagement"] | null;
+
 interface WorkFilterOption {
-  id: WorkMediaType | null;
+  id: WorkEngagementFilter;
   label: string;
 }
 
 const options: WorkFilterOption[] = [
   { id: null, label: "All" },
-  { id: "campaigns", label: "Campaigns" },
-  { id: "motion", label: "Motion" },
+  { id: "build", label: "Built from scratch" },
+  { id: "care", label: "Ongoing care" },
 ];
 
 interface WorkFilterProps {
-  active: WorkMediaType | null;
-  onSelect: (type: WorkMediaType | null) => void;
+  active: WorkEngagementFilter;
+  onSelect: (type: WorkEngagementFilter) => void;
 }
 
 export function WorkFilter({ active, onSelect }: WorkFilterProps) {

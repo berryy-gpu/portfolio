@@ -33,7 +33,7 @@ export function AboutTimeline() {
   if (aboutContent.timeline.length === 0) return null;
 
   return (
-    <section className="py-expansive md:py-cinematic">
+    <section className="py-expansive">
       <Container width="reading">
         <div className="flex flex-col gap-3 pb-12">
           <span className="font-mono text-caption tracking-caption text-text-tertiary uppercase">

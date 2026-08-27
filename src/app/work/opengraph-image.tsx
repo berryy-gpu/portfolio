@@ -8,11 +8,11 @@ import { workDescription } from "./page-meta";
 
 export const size = ogImageSize;
 export const contentType = ogImageContentType;
-export const alt = "Creative Showcase";
+export const alt = "Selected Work";
 
 export default function Image() {
   return renderOgImage({
-    title: "Creative Showcase",
+    title: "Selected Work",
     subtitle: workDescription,
   });
 }

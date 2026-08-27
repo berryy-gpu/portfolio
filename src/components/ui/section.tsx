@@ -13,7 +13,7 @@ const spacingClasses: Record<SectionSpacing, string> = {
 
 interface SectionHeaderConfig {
   eyebrow?: string;
-  title: string;
+  title?: string;
   description?: string;
   align?: "left" | "center";
   width?: "reading" | "full";

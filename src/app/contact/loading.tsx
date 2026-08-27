@@ -2,7 +2,7 @@ import { Container } from "@/components/ui/container";
 
 export default function ContactLoading() {
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center py-expansive md:py-cinematic">
+    <div className="flex min-h-[70vh] flex-col items-center justify-center py-expansive">
       <Container width="reading">
         <div className="flex flex-col items-center gap-8 text-center">
           <div className="h-4 w-16 animate-pulse rounded-pill bg-surface" />

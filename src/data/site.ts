@@ -22,5 +22,9 @@ export const siteConfig: SiteConfig = {
   email: "m.baranhaider2018@gmail.com",
   location: "Lahore, PK",
   avatar: "/images/profile/me.png",
-  socialLinks: [],
+  socialLinks: [
+    { label: "Instagram", url: "https://www.instagram.com/baranhaider.dev/" },
+    { label: "LinkedIn", url: "https://www.linkedin.com/in/baran-haider-288326353" },
+    { label: "WhatsApp", url: "https://wa.me/923148662368" },
+  ],
 };

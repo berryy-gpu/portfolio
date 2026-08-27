@@ -57,7 +57,13 @@ export function Statement() {
       className="flex min-h-screen items-center"
     >
       <Container width="reading">
-        <p ref={textRef} className="font-heading text-h1 leading-snug">
+        <span className="mb-4 block font-mono text-caption tracking-caption text-text-tertiary uppercase">
+          — Statement —
+        </span>
+        <p
+          ref={textRef}
+          className="font-heading text-[clamp(1.75rem,3.4vw,2.75rem)] leading-snug"
+        >
           {manifesto.statement}
         </p>
       </Container>

@@ -28,6 +28,7 @@ import { useWebglSupported } from "@/hooks/use-webgl-supported";
 import { useIsomorphicLayoutEffect } from "@/hooks/use-isomorphic-layout-effect";
 import { contactCta } from "@/data/navigation";
 import { heroConfig } from "@/data/hero";
+import { services } from "@/data/services";
 import { siteConfig } from "@/data/site";
 import { gsap } from "@/lib/gsap";
 import { buttonVariants } from "@/components/ui/button";
@@ -41,6 +42,8 @@ const HeroView = dynamic(
 );
 
 const ACCENT_WORD = "grow";
+
+const sortedServices = [...services].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
 function renderTaglineWithAccent(tagline: string, word: string) {
   const index = tagline.toLowerCase().indexOf(word.toLowerCase());
@@ -156,7 +159,7 @@ export function Hero() {
         </div>
       )}
 
-      <div className="relative z-10 flex flex-1 flex-col justify-between px-6 py-8 md:px-10 md:py-10">
+      <div className="relative z-10 flex flex-1 flex-col justify-between gap-8 px-6 py-8 md:px-10 md:py-10">
         <div className="inline-flex w-fit items-center gap-2 rounded-pill border border-border bg-surface/50 px-4 py-2 backdrop-blur-functional">
           <span
             aria-hidden="true"
@@ -167,7 +170,7 @@ export function Hero() {
           </span>
         </div>
 
-        <div className="flex max-w-5xl flex-col gap-8">
+        <div className="flex max-w-5xl flex-col gap-8 rounded-lg border border-border bg-surface/45 p-6 shadow-glass backdrop-blur-functional md:p-10">
           <SplitTextReveal
             as="h1"
             preset="maskUp"
@@ -182,6 +185,7 @@ export function Hero() {
               <TransitionLink
                 href={heroConfig.cta.href}
                 label={heroConfig.cta.label}
+                withHoverSound
                 className={buttonVariants({ variant: "outline", size: "lg" })}
               >
                 {heroConfig.cta.label}
@@ -191,12 +195,27 @@ export function Hero() {
               <TransitionLink
                 href={contactCta.href}
                 label={contactCta.label}
+                withHoverSound
                 className={buttonVariants({ variant: "ghost", size: "lg" })}
               >
                 {contactCta.label}
               </TransitionLink>
             </Magnetic>
           </div>
+
+          {sortedServices.length > 0 && (
+            <div className="flex gap-x-5 gap-y-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible">
+              {sortedServices.map((service) => (
+                <span
+                  key={service.id}
+                  className="flex shrink-0 items-center gap-2 font-mono text-caption tracking-caption text-text-secondary uppercase"
+                >
+                  <span aria-hidden="true" className="h-1 w-1 shrink-0 rounded-full bg-accent" />
+                  {service.title}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex items-end justify-between">

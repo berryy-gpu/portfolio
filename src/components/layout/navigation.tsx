@@ -137,6 +137,7 @@ export function Navigation() {
                   key={item.href}
                   href={item.href}
                   label={item.label}
+                  withHoverSound
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "group relative text-small transition-colors",

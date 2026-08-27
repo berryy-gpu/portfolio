@@ -20,11 +20,15 @@
  * to its own `poster` while nothing is playing. Only one preview video
  * plays at a time across the page — a module-level ref pauses whichever
  * one was previously active before a new one starts.
+ *
+ * The follow/tilt tick rides the shared gsap.ticker rather than its own
+ * requestAnimationFrame loop — see magnetic.tsx's docstring for why.
  */
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 
+import { gsap } from "@/lib/gsap";
 import { damp } from "@/lib/utils";
 import { zIndex } from "@/lib/motion-tokens";
 
@@ -91,12 +95,8 @@ export function CursorFollowPreview({ image, video = null }: CursorFollowPreview
 
     window.addEventListener("pointermove", handlePointerMove);
 
-    let frameId: number;
-    let lastTime = performance.now();
-
-    const tick = (time: number) => {
-      const delta = (time - lastTime) / 1000;
-      lastTime = time;
+    const tick = (_time: number, deltaMs: number) => {
+      const delta = deltaMs / 1000;
 
       const rawVelocity = (target.current.x - lastTargetX.current) / Math.max(delta, 0.001);
       lastTargetX.current = target.current.x;
@@ -110,15 +110,13 @@ export function CursorFollowPreview({ image, video = null }: CursorFollowPreview
       if (wrapper) {
         wrapper.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0) translate(-50%, -50%) rotate(${tilt.current}deg)`;
       }
-
-      frameId = requestAnimationFrame(tick);
     };
 
-    frameId = requestAnimationFrame(tick);
+    gsap.ticker.add(tick);
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
-      cancelAnimationFrame(frameId);
+      gsap.ticker.remove(tick);
     };
   }, []);
 

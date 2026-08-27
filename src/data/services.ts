@@ -1,8 +1,8 @@
-import type { ProjectImagePath, SocialImagePath } from "./assets";
+import type { ProjectImagePath, ServiceImagePath, SocialImagePath } from "./assets";
 import type { CategoryId } from "./categories";
 
 export interface ServicePreviewImage {
-  src: ProjectImagePath | SocialImagePath;
+  src: ProjectImagePath | SocialImagePath | ServiceImagePath;
   alt: string;
 }
 
@@ -16,10 +16,9 @@ export interface Service {
    * Sanctioned data addition for REBUILD-SPEC.md's Capabilities section
    * (the cursor-follow preview). Only mapped to a REAL existing asset —
    * left unset rather than guessing when nothing genuinely represents the
-   * service (video-editing/video-production have no poster images yet,
-   * ffmpeg wasn't available in Phase 1; seo/ai-automation have no
-   * deliverable screenshot at all). Capabilities renders the row without
-   * a preview when this is absent — never a placeholder image.
+   * service. Capabilities renders the row without a preview when this is
+   * absent — never a placeholder image. website-care has none, correctly:
+   * it's ongoing maintenance work with no single representative shot.
    */
   previewImage?: ServicePreviewImage;
 }
@@ -49,8 +48,8 @@ export const services: Service[] = [
     categoryIds: ["social-media", "marketing"],
     order: 3,
     previewImage: {
-      src: "/images/social/pixelscape/pixelscape-01.jpg",
-      alt: "Pixelscape — social post",
+      src: "/images/services/service-social-media-marketing.webp",
+      alt: "30-day organic reach results — 21K views, real numbers",
     },
   },
   {
@@ -58,24 +57,40 @@ export const services: Service[] = [
     title: "Video Editing",
     categoryIds: ["video-editing"],
     order: 4,
+    previewImage: {
+      src: "/images/services/service-video-editing-timeline.webp",
+      alt: "Video editing timeline in DaVinci Resolve",
+    },
   },
   {
     id: "video-production",
     title: "Video Production",
     categoryIds: ["video-production"],
     order: 5,
+    previewImage: {
+      src: "/images/services/service-video-production-set.webp",
+      alt: "On-set video production — camera and lighting setup",
+    },
   },
   {
     id: "seo",
     title: "SEO",
     categoryIds: ["seo"],
     order: 6,
+    previewImage: {
+      src: "/images/services/service-seo-structure-beats-keywords.webp",
+      alt: "Technical SEO — site structure over keyword stuffing",
+    },
   },
   {
     id: "ai-automation",
     title: "AI Automation",
     categoryIds: ["ai-automation"],
     order: 7,
+    previewImage: {
+      src: "/images/services/service-ai-automation-logic.webp",
+      alt: "AI automation — trigger and action logic",
+    },
   },
 ];
 

@@ -20,6 +20,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { buttonVariants } from "@/components/ui/button";
+import { useSound } from "@/components/providers/sound-provider";
 import { siteConfig } from "@/data/site";
 import { cn } from "@/lib/utils";
 import { contactFormSchema, type ContactFormValues } from "@/lib/validations/contact";
@@ -61,6 +62,7 @@ export function ContactForm() {
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const { playClick } = useSound();
 
   const {
     register,
@@ -160,6 +162,7 @@ export function ContactForm() {
           <button
             type="submit"
             disabled={isSubmitting}
+            onClick={playClick}
             className={cn(buttonVariants({ variant: "outline", size: "lg" }), "relative")}
           >
             <span className={cn("transition-opacity", isSubmitting && "opacity-0")}>

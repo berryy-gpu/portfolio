@@ -11,7 +11,7 @@ import { MotionReel } from "./motion-reel";
 import { Process } from "./process";
 import { Statement } from "./statement";
 import { Stats } from "./stats";
-import { Testimonials } from "./testimonials";
+import { TestimonialWall } from "./testimonial-wall";
 
 export interface HomepageSection {
   id: string;
@@ -45,6 +45,6 @@ export const homepageSections: HomepageSection[] = [
   { id: "process", component: Process },
   { id: "stats", component: Stats },
   { id: "clients-worldwide", component: ClientsWorldwide },
-  { id: "testimonials", component: Testimonials },
+  { id: "testimonial-wall", component: TestimonialWall },
   { id: "cta", component: Cta },
 ];

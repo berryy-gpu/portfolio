@@ -42,7 +42,7 @@ export function Process() {
   if (philosophyStages.length === 0) return null;
 
   return (
-    <section className="py-cinematic">
+    <section className="py-expansive">
       <Container width="reading">
         <div ref={scrubRef} className="relative">
           <div

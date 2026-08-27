@@ -1,34 +1,20 @@
 "use client";
 
 /**
- * Orchestrates the filterable middle of the page: the quiet media-type
- * filter plus the two content sections it controls (Campaigns, Motion
- * Design). Explore Client Stories lives outside this — it's the closing
- * section, not filtered content, so it always shows.
- *
- * Each section owns its own Section wrapper/spacing/scroll-reveal;
- * this component only decides which are mounted and animates the
- * mount/unmount + reflow when the filter changes.
+ * REBUILD-SPEC.md step 8 — /work is websites only now. Campaigns and
+ * Motion Design (and their filter) moved to /gallery; this component now
+ * just owns the build-vs-care filter and hands it to ClientStories, which
+ * does the actual filtering of its own Builds/Ongoing Care groups.
  */
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
 import { Container } from "@/components/ui/container";
-import type { WorkMediaType } from "@/data/work";
-import { duration, easing } from "@/lib/motion-tokens";
-import { CampaignGallery } from "./campaign-gallery";
-import { MotionDesignWall } from "./motion-design-wall";
-import { WorkFilter } from "./work-filter";
+import { ClientStories } from "./client-stories";
+import { WorkFilter, type WorkEngagementFilter } from "./work-filter";
 
 export function WorkExperience() {
-  const [active, setActive] = useState<WorkMediaType | null>(null);
-  const prefersReducedMotion = useReducedMotion();
-
-  const sections: { key: WorkMediaType; node: ReactNode }[] = [
-    { key: "campaigns", node: <CampaignGallery /> },
-    { key: "motion", node: <MotionDesignWall /> },
-  ];
+  const [active, setActive] = useState<WorkEngagementFilter>(null);
 
   return (
     <>
@@ -38,22 +24,7 @@ export function WorkExperience() {
         </Container>
       </div>
 
-      <AnimatePresence mode="popLayout">
-        {sections
-          .filter(({ key }) => !active || active === key)
-          .map(({ key, node }) => (
-            <motion.div
-              key={key}
-              layout={!prefersReducedMotion}
-              initial={prefersReducedMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-              transition={{ duration: duration.normal, ease: easing.standard }}
-            >
-              {node}
-            </motion.div>
-          ))}
-      </AnimatePresence>
+      <ClientStories activeEngagement={active} />
     </>
   );
 }

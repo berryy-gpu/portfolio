@@ -1,16 +1,15 @@
-import { aboutContent } from "./about";
-
 export interface ManifestoContent {
   statement: string;
 }
 
 /**
- * The homepage Statement section's copy. Reuses aboutContent.philosophy —
- * the site's one existing real statement of values/approach, already
- * written and approved for the About page — rather than inventing new
- * marketing copy for this placement. Sharing the string (not duplicating
- * it) means an edit only ever has to happen in one place.
+ * The homepage Statement section's copy — real, user-supplied text, kept
+ * verbatim. Previously aliased aboutContent.philosophy, which is itself
+ * invented filler never actually supplied (see about.ts — flagged
+ * separately, not touched here since this step only covers the Statement
+ * section). This string is its own thing now, not shared with About.
  */
 export const manifesto: ManifestoContent = {
-  statement: aboutContent.philosophy,
+  statement:
+    "I don't just build websites. I build things people want to use, content people want to watch, and systems that make a business easier to discover, understand, and trust.",
 };

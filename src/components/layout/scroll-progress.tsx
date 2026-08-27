@@ -3,7 +3,9 @@
 /**
  * Fixed 1px progress bar at the very top, above nav, below the
  * transition overlay — reads Step 2's useScrollProgress() ref directly
- * in its own rAF loop, never React state. transform: scaleX() with
+ * on the shared gsap.ticker (the same one driving Lenis), never React
+ * state and never its own requestAnimationFrame loop — see
+ * magnetic.tsx's docstring for why. transform: scaleX() with
  * transform-origin left so it stays a compositor-only update per the
  * performance budget. Hidden entirely under prefers-reduced-motion.
  */
@@ -12,6 +14,7 @@ import { useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
+import { gsap } from "@/lib/gsap";
 import { zIndex } from "@/lib/motion-tokens";
 
 export function ScrollProgress() {
@@ -24,15 +27,12 @@ export function ScrollProgress() {
     const bar = barRef.current;
     if (!bar) return;
 
-    let frameId: number;
-
     const tick = () => {
       bar.style.transform = `scaleX(${progress.current})`;
-      frameId = requestAnimationFrame(tick);
     };
 
-    frameId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frameId);
+    gsap.ticker.add(tick);
+    return () => gsap.ticker.remove(tick);
   }, [progress, prefersReducedMotion]);
 
   if (prefersReducedMotion) return null;

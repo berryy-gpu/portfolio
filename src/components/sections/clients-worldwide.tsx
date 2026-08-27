@@ -45,7 +45,7 @@ export function ClientsWorldwide() {
   if (entries.length === 0) return null;
 
   return (
-    <section className="py-expansive">
+    <section className="border-y border-border bg-surface py-expansive">
       <Container>
         <SectionHeader eyebrow="Global Reach" title="Clients, worldwide" />
 

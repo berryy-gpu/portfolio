@@ -9,13 +9,23 @@
  * with the portrait FIRST (`order-1`/`lg:order-2` — DOM order drives
  * mobile stacking, grid placement drives the lg+ layout).
  *
- * clipReveal entrance (RevealImage) plus the existing grayscale->colour
- * scrub, unchanged — it already only ever animates opacity (a static-
- * grayscale overlay crossfading out over a static-colour image beneath),
- * never `filter`, which the performance budget excludes from scroll
- * loops. next/image (via RevealImage) already serves the Phase 1
- * optimised avif/webp variants of me.png automatically through content
- * negotiation — no need to hardcode a specific format.
+ * clipReveal entrance (RevealImage) plus a grayscale->colour fade on the
+ * portrait — opacity only (a static-grayscale overlay crossfading out
+ * over a static-colour image beneath), never `filter`, which the
+ * performance budget excludes from scroll loops. next/image (via
+ * RevealImage) already serves the Phase 1 optimised avif/webp variants
+ * of me.png automatically through content negotiation — no need to
+ * hardcode a specific format.
+ *
+ * The grayscale fade is MOUNT-triggered, not scroll-scrubbed — this
+ * section sits above the fold, so a scroll-scrub trigger boundary
+ * (`start`/`end` relative to scroll position) starts out already behind
+ * the initial scroll position and the animation's fromTo state (fully
+ * grayscale) never advances. Per this codebase's own convention (scroll-
+ * driven animation is for content revealed BY scrolling; above-the-fold,
+ * mount-visible content uses mount-driven animation instead — see
+ * hero.tsx), this plays once on mount, shortly after RevealImage's own
+ * clipReveal entrance would have completed.
  *
  * Facts block: every fact is derived from real data or omitted — never a
  * hardcoded number. Location from siteConfig, years working computed
@@ -24,13 +34,14 @@
 
 import Image from "next/image";
 import { useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 
 import { RevealImage } from "@/components/motion/reveal-image";
 import { Container } from "@/components/ui/container";
 import { aboutContent } from "@/data/about";
 import { clients } from "@/data/clients";
 import { siteConfig } from "@/data/site";
-import { useScrollScrub } from "@/hooks/use-scroll-scrub";
+import { useIsomorphicLayoutEffect } from "@/hooks/use-isomorphic-layout-effect";
 import { gsap } from "@/lib/gsap";
 
 function getYearsWorking(): number | null {
@@ -43,21 +54,30 @@ function getYearsWorking(): number | null {
 
 export function AboutStatement() {
   const grayscaleOverlayRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
   const yearsWorking = getYearsWorking();
 
-  const scrubRef = useScrollScrub<HTMLDivElement>({
-    start: "top 70%",
-    end: "bottom 40%",
-    scrub: true,
-    build: (_container, baseVars) => {
-      const overlay = grayscaleOverlayRef.current;
-      if (!overlay) return;
-      gsap.fromTo(overlay, { opacity: 1 }, { opacity: 0, ease: "none", scrollTrigger: baseVars });
-    },
-    reducedMotionFallback: () => {
-      if (grayscaleOverlayRef.current) gsap.set(grayscaleOverlayRef.current, { opacity: 0 });
-    },
-  });
+  useIsomorphicLayoutEffect(() => {
+    const overlay = grayscaleOverlayRef.current;
+    if (!overlay) return;
+
+    if (prefersReducedMotion) {
+      gsap.set(overlay, { opacity: 0 });
+      return;
+    }
+
+    gsap.set(overlay, { opacity: 1 });
+    const tween = gsap.to(overlay, {
+      opacity: 0,
+      duration: 1.3,
+      delay: 0.6,
+      ease: "power1.out",
+    });
+
+    return () => {
+      tween.kill();
+    };
+  }, [prefersReducedMotion]);
 
   return (
     <section className="py-generous md:py-expansive">
@@ -72,7 +92,7 @@ export function AboutStatement() {
         </div>
 
         <div className="order-1 flex flex-col gap-6 lg:order-2">
-          <div ref={scrubRef} className="relative aspect-4/5 w-full overflow-hidden rounded-lg">
+          <div className="relative aspect-4/5 w-full overflow-hidden rounded-lg">
             <RevealImage
               src={siteConfig.avatar}
               alt={siteConfig.name}

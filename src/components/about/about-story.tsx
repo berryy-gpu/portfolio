@@ -58,7 +58,7 @@ function ParagraphGroup({
 
 export function AboutStory() {
   return (
-    <section className="py-expansive md:py-cinematic">
+    <section className="py-expansive">
       <Container>
         <div className="flex flex-col gap-16">
           <ParagraphGroup label="01 — Background" paragraphs={BACKGROUND_PARAGRAPHS} />

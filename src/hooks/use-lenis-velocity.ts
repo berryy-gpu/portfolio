@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { useLenis } from "@/components/providers/smooth-scroller";
+import { gsap } from "@/lib/gsap";
 import { damp } from "@/lib/utils";
 
 const MAX_MULTIPLIER = 3;
@@ -15,8 +16,13 @@ const SMOOTHING = 6;
  * the point. `velocityRef.current` is a damped multiplier clamped to
  * +/-3x, positive scrolling down and negative scrolling up, decaying
  * toward 0 as Lenis's own momentum settles. Read it inside a consumer's
- * own rAF loop (see components/motion/marquee.tsx) rather than subscribing
- * to it as state.
+ * own gsap.ticker callback (see components/motion/marquee.tsx) rather
+ * than subscribing to it as state.
+ *
+ * The damping tick itself rides the shared gsap.ticker (the same one
+ * driving Lenis) instead of its own requestAnimationFrame loop — see
+ * magnetic.tsx's docstring for why every damped-follow effect on the
+ * site shares that one ticker rather than spawning its own.
  */
 export function useLenisVelocity() {
   const lenis = useLenis();
@@ -34,25 +40,20 @@ export function useLenisVelocity() {
       );
     });
 
-    let frameId: number;
-    let lastTime = performance.now();
-
-    const tick = (time: number) => {
-      const delta = (time - lastTime) / 1000;
-      lastTime = time;
+    const tick = (_time: number, deltaMs: number) => {
+      const delta = deltaMs / 1000;
       velocityRef.current = damp(
         velocityRef.current,
         targetRef.current,
         SMOOTHING,
         delta
       );
-      frameId = requestAnimationFrame(tick);
     };
-    frameId = requestAnimationFrame(tick);
+    gsap.ticker.add(tick);
 
     return () => {
       unsubscribe();
-      cancelAnimationFrame(frameId);
+      gsap.ticker.remove(tick);
     };
   }, [lenis]);
 

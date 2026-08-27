@@ -28,11 +28,17 @@ export function AboutPhilosophy() {
   });
 
   return (
-    <Section spacing="cinematic">
-      <div ref={containerRef} className="mx-auto max-w-4xl text-center">
+    <Section header={{ eyebrow: "Philosophy" }} className="bg-surface">
+      <div ref={containerRef} className="relative mx-auto max-w-4xl text-center">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-8 left-0 font-heading text-display-xxl text-accent/40 select-none md:-top-12"
+        >
+          &ldquo;
+        </span>
         <p
           data-reveal="philosophy-statement"
-          className="font-heading text-h1 text-text-primary"
+          className="font-heading text-h2 text-text-primary"
         >
           {aboutContent.philosophy}
         </p>

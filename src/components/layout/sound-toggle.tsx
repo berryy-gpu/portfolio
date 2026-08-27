@@ -11,12 +11,23 @@ import { zIndex } from "@/lib/motion-tokens";
 import { cn } from "@/lib/utils";
 
 export function SoundToggle() {
-  const { enabled, toggle } = useSound();
+  const { enabled, toggle, playClick } = useSound();
+
+  const handleClick = () => {
+    // Fires before toggle()'s state update lands, so this only actually
+    // plays when muting (turning sound off from an already-enabled
+    // state) — silent no-op the first time sound turns on, since
+    // `enabled` here still reflects the pre-click render. Acceptable:
+    // the ambient loop's own 1.5s fade-in is the audible confirmation
+    // in that case instead.
+    playClick();
+    toggle();
+  };
 
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={handleClick}
       aria-pressed={enabled}
       aria-label={enabled ? "Mute sound" : "Unmute sound"}
       style={{ zIndex: zIndex.elevated }}

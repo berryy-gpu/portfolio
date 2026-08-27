@@ -2,7 +2,9 @@ import { cn } from "@/lib/utils";
 
 interface SectionHeaderProps {
   eyebrow?: string;
-  title: string;
+  /** Optional — omit when the eyebrow alone is the header (e.g. a
+   *  pull-quote section where the quote itself is the content). */
+  title?: string;
   description?: string;
   align?: "left" | "center";
   width?: "reading" | "full";
@@ -32,7 +34,7 @@ export function SectionHeader({
           {eyebrow}
         </span>
       )}
-      <h2 className="font-heading text-h2 text-text-primary">{title}</h2>
+      {title && <h2 className="font-heading text-h2 text-text-primary">{title}</h2>}
       {description && (
         <p className="text-body text-text-secondary">{description}</p>
       )}

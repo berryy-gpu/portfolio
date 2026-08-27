@@ -57,6 +57,7 @@ export function Cta() {
           <TransitionLink
             href={homepageCtaConfig.cta.href}
             label={homepageCtaConfig.cta.label}
+            withHoverSound
             className={buttonVariants({ variant: "default", size: "lg" })}
           >
             {homepageCtaConfig.cta.label}

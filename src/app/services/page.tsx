@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Process } from "@/components/sections/process";
+import { TestimonialWall } from "@/components/sections/testimonial-wall";
 import { Container } from "@/components/ui/container";
 import { Faq } from "@/components/services/faq";
 import { ServiceBlock } from "@/components/services/service-block";
@@ -46,6 +47,7 @@ export default function ServicesPage() {
       <Process />
       <TechStack />
       <Faq />
+      <TestimonialWall />
       <ServicesCta />
     </>
   );

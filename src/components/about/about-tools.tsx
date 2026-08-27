@@ -23,7 +23,7 @@ export function AboutTools() {
   if (sorted.length === 0) return null;
 
   return (
-    <section className="py-expansive md:py-cinematic">
+    <section className="py-expansive">
       <Container className="pb-8">
         <span className="font-mono text-caption tracking-caption text-text-tertiary uppercase">
           Tools

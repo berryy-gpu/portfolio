@@ -2,17 +2,18 @@
 
 /**
  * REBUILD-SPEC.md /work header: "SELECTED WORK" at display-xl with a
- * live count in mono — derived from getClientStories(), never hardcoded.
+ * live count in mono — derived from getWebsiteClientStories() (websites
+ * only, per step 8), never hardcoded.
  */
 
 import { motion, useReducedMotion } from "framer-motion";
 
-import { getClientStories } from "@/data/work";
+import { getWebsiteClientStories } from "@/data/work";
 import { easing } from "@/lib/motion-tokens";
 
 export function WorkHeader() {
   const prefersReducedMotion = useReducedMotion();
-  const count = getClientStories().length;
+  const count = getWebsiteClientStories().length;
 
   return (
     <motion.div

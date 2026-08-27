@@ -15,12 +15,20 @@
  * cursor-spotlight.tsx — and fully inert under prefers-reduced-motion.
  * Transform-only (translate3d), so it stays compositor-driven inside the
  * pointer loop per the performance budget.
+ *
+ * Driven by the shared gsap.ticker (the same one smooth-scroller.tsx
+ * already drives Lenis with) rather than its own requestAnimationFrame
+ * loop — REBUILD-SPEC.md's performance budget caps active rAF loops at
+ * two (R3F's render loop, Lenis via the ticker); every damped-follow
+ * effect on the site should ride that same ticker instead of spawning
+ * its own.
  */
 
 import { cloneElement, useEffect, useRef, type ReactElement } from "react";
 import { useReducedMotion } from "framer-motion";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { gsap } from "@/lib/gsap";
 import { damp } from "@/lib/utils";
 
 interface MagneticProps {
@@ -44,8 +52,6 @@ export function Magnetic({ children, radius = 120, strength = 12 }: MagneticProp
 
     const target = { x: 0, y: 0 };
     const current = { x: 0, y: 0 };
-    let frameId: number;
-    let lastTime = performance.now();
 
     const handlePointerMove = (event: PointerEvent) => {
       const rect = el.getBoundingClientRect();
@@ -63,21 +69,19 @@ export function Magnetic({ children, radius = 120, strength = 12 }: MagneticProp
       }
     };
 
-    const tick = (time: number) => {
-      const delta = (time - lastTime) / 1000;
-      lastTime = time;
+    const tick = (_time: number, deltaMs: number) => {
+      const delta = deltaMs / 1000;
       current.x = damp(current.x, target.x, 10, delta);
       current.y = damp(current.y, target.y, 10, delta);
       el.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
-      frameId = requestAnimationFrame(tick);
     };
 
     window.addEventListener("pointermove", handlePointerMove);
-    frameId = requestAnimationFrame(tick);
+    gsap.ticker.add(tick);
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
-      cancelAnimationFrame(frameId);
+      gsap.ticker.remove(tick);
       el.style.transform = "";
     };
   }, [enabled, radius, strength]);

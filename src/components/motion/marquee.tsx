@@ -11,6 +11,9 @@
  * Static (no animation, no velocity coupling) under prefers-reduced-motion
  * or the 'low' quality tier — the two conditions the Quality tiers table
  * marks as "static" for this row.
+ *
+ * Driven by the shared gsap.ticker rather than its own requestAnimationFrame
+ * loop — see magnetic.tsx's docstring for why.
  */
 
 import { useEffect, useRef, type ReactNode } from "react";
@@ -18,6 +21,7 @@ import { useReducedMotion } from "framer-motion";
 
 import { useLenisVelocity } from "@/hooks/use-lenis-velocity";
 import { useQualityTier } from "@/hooks/use-quality-tier";
+import { gsap } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
 interface MarqueeProps {
@@ -26,6 +30,10 @@ interface MarqueeProps {
   baseSpeed?: number;
   className?: string;
   itemClassName?: string;
+  /** Opt-in: freezes the offset on pointer hover, resumes on leave.
+   *  Default false so existing consumers (ClientMarquee, AboutTools) are
+   *  unaffected. */
+  pauseOnHover?: boolean;
 }
 
 export function Marquee({
@@ -33,9 +41,11 @@ export function Marquee({
   baseSpeed = 40,
   className,
   itemClassName,
+  pauseOnHover = false,
 }: MarqueeProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const firstSetRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef(false);
   const prefersReducedMotion = useReducedMotion();
   const tier = useQualityTier();
   const velocityRef = useLenisVelocity();
@@ -56,12 +66,10 @@ export function Marquee({
     resizeObserver.observe(firstSet);
 
     let offset = 0;
-    let frameId: number;
-    let lastTime = performance.now();
 
-    const tick = (time: number) => {
-      const delta = (time - lastTime) / 1000;
-      lastTime = time;
+    const tick = (_time: number, deltaMs: number) => {
+      if (isPausedRef.current) return;
+      const delta = deltaMs / 1000;
 
       if (setWidth > 0) {
         const velocityMultiplier = 1 + velocityRef.current;
@@ -69,20 +77,22 @@ export function Marquee({
         offset = ((offset % setWidth) + setWidth) % setWidth;
         track.style.transform = `translate3d(${-offset}px, 0, 0)`;
       }
-
-      frameId = requestAnimationFrame(tick);
     };
 
-    frameId = requestAnimationFrame(tick);
+    gsap.ticker.add(tick);
 
     return () => {
-      cancelAnimationFrame(frameId);
+      gsap.ticker.remove(tick);
       resizeObserver.disconnect();
     };
   }, [isStatic, baseSpeed, velocityRef]);
 
   return (
-    <div className={cn("overflow-hidden", className)}>
+    <div
+      className={cn("overflow-hidden", className)}
+      onPointerEnter={pauseOnHover ? () => (isPausedRef.current = true) : undefined}
+      onPointerLeave={pauseOnHover ? () => (isPausedRef.current = false) : undefined}
+    >
       <div
         ref={trackRef}
         className={cn("flex w-max", !isStatic && "will-change-transform")}
