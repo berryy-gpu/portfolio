@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Section } from "@/components/ui/section";
 import { CursorSpotlight } from "@/components/work/cursor-spotlight";
 import { WorkAmbientBackground } from "@/components/work/work-ambient-background";
+import { WorkCta } from "@/components/work/work-cta";
 import { WorkExperience } from "@/components/work/work-experience";
 import { WorkHeader } from "@/components/work/work-header";
 
@@ -22,6 +23,7 @@ export default function WorkPage() {
         <WorkHeader />
       </Section>
       <WorkExperience />
+      <WorkCta />
     </>
   );
 }
