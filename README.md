@@ -4,7 +4,7 @@ A premium personal portfolio built with Next.js 15, React 19, and TypeScript —
 
 ## Stack
 
-Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui (`@base-ui/react`) · GSAP + ScrollTrigger · Lenis · Framer Motion · React Three Fiber · React Hook Form + Zod · Resend.
+Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui (`@base-ui/react`) · GSAP + ScrollTrigger · Lenis · Framer Motion · React Three Fiber · React Hook Form + Zod · Nodemailer (SMTP).
 
 See `CLAUDE.md` for the full architecture reference.
 
@@ -33,14 +33,17 @@ cp .env.example .env.local
 | Variable | Required | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_SITE_URL` | No, but recommended once deployed | Canonical absolute URL used for `metadataBase`, the sitemap, `robots.txt`, and JSON-LD/Open Graph image URLs. Falls back to `http://localhost:3000`. |
-| `RESEND_API_KEY` | Yes, in production | Sends the contact form's notification email via [Resend](https://resend.com). Without it, `/api/contact` returns a 500 and the form shows an error state — it fails safely, it just won't send. |
-| `RESEND_FROM_EMAIL` | No | Sender address for outgoing mail. Must be on a domain verified in Resend to send at real volume. Defaults to Resend's `onboarding@resend.dev` sandbox sender, which works without domain verification but is meant for testing. |
+| `SMTP_HOST` | Yes, in production | SMTP server hostname used by Nodemailer (`src/lib/mailer.ts`) to send the contact form's notification email. Without any one of the five `SMTP_*` variables, `getMailer()` returns null, `/api/contact` returns a 500, and the form shows an error state — it fails safely, it just won't send. |
+| `SMTP_PORT` | Yes, in production | SMTP port, e.g. `465`. |
+| `SMTP_SECURE` | Yes, in production | `"true"` or `"false"` (compared as a literal string, not cast with `Boolean(...)`) — whether to connect with TLS from the start. |
+| `SMTP_USER` | Yes, in production | The authenticated SMTP account. Also used as the outgoing `from` address — most providers, Gmail included, reject a `from` that doesn't match the authenticated account. If using Gmail: this is the full Gmail address. |
+| `SMTP_PASSWORD` | Yes, in production | The SMTP account's password. If using Gmail: this must be a [Google App Password](https://myaccount.google.com/apppasswords) (requires 2-Step Verification enabled first), not the normal account password. |
 
 The contact form's recipient address is not an environment variable — it's `siteConfig.email` in `src/data/site.ts`.
 
 ## Deployment Notes
 
 - Deploys cleanly to Vercel (or any Next.js-compatible host) with zero extra configuration beyond the environment variables above.
-- Set `RESEND_API_KEY` (and, once you have a verified sending domain, `RESEND_FROM_EMAIL`) in your host's environment variable settings — never commit real values to `.env.local` or anywhere else in the repo.
+- Set all five `SMTP_*` variables in your host's environment variable settings (e.g. Vercel → Settings → Environment Variables, for both Production and Preview, followed by a redeploy) — `.env.local` is gitignored and never reaches the host on its own. Never commit real values to `.env.local` or anywhere else in the repo.
 - `/work/[clientId]` is statically generated at build time via `generateStaticParams` — no server-side data fetching, no database.
 - Set `NEXT_PUBLIC_SITE_URL` to the real production domain once known — it drives `metadataBase`, the sitemap, `robots.txt`, and Open Graph image URLs.

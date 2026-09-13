@@ -23,7 +23,7 @@ is working under):
   and `src/components/work/cursor-spotlight.tsx` are FROZEN — byte-identical,
   do not restyle or refactor them.
 - Color tokens in `src/app/globals.css` (`:root` / `@theme inline`) are FROZEN.
-- `src/app/api/contact/route.ts`, `src/lib/resend.ts`, `src/lib/validations/contact.ts`
+- `src/app/api/contact/route.ts`, `src/lib/mailer.ts`, `src/lib/validations/contact.ts`
   are FROZEN — presentation around the contact form may change, the pipeline
   itself may not.
 - `src/data/*` is the correct, load-bearing source of content. Never invent
@@ -49,7 +49,7 @@ To add a shadcn/ui component: `npx shadcn@latest add <component>` — writes int
 - **Next.js 15** (App Router) on **React 19**, TypeScript, `src/` layout, `@/*` import alias → `src/*`.
 - **Tailwind CSS v4** — no `tailwind.config.*` file; theme tokens (colors, type scale, spacing, radii, shadows) live as CSS custom properties in `src/app/globals.css` under `@theme inline` and `:root`. Single fixed dark theme, no light mode/toggle.
 - **shadcn/ui**, configured via `components.json` with the `base-nova` style, `neutral` base color, and **`@base-ui/react`** as the primitive layer (not Radix — this is shadcn's current default, so don't assume Radix primitives/APIs when reading or extending `src/components/ui/*`).
-- **GSAP + ScrollTrigger**, **Lenis** (smooth scroll), **Framer Motion**, **React Three Fiber** (`@react-three/fiber`, `@react-three/drei`, `three`), **Lucide React** for icons, **class-variance-authority** / **clsx** / **tailwind-merge** for variant/class composition, **react-hook-form** + **zod** for the contact form, **Resend** for email delivery.
+- **GSAP + ScrollTrigger**, **Lenis** (smooth scroll), **Framer Motion**, **React Three Fiber** (`@react-three/fiber`, `@react-three/drei`, `three`), **Lucide React** for icons, **class-variance-authority** / **clsx** / **tailwind-merge** for variant/class composition, **react-hook-form** + **zod** for the contact form, **Nodemailer** (plain SMTP) for email delivery.
 
 ## Architecture
 
@@ -67,7 +67,7 @@ To add a shadcn/ui component: `npx shadcn@latest add <component>` — writes int
 - `src/components/three/hero-scene.tsx` — the current (pre-rebuild) sole Three.js moment: a low-poly icosahedron, dynamically imported with `ssr: false` from `hero.tsx`. REBUILD-SPEC.md replaces this with a persistent single-`<Canvas>` architecture (`View.Port`/`View` slots) — don't add a second ad-hoc `<Canvas>` elsewhere without reading that spec first.
 - `src/components/work/`, `src/components/client-story/`, `src/components/about/`, `src/components/services/`, `src/components/contact/`, `src/components/layout/` — page-specific component groups for `/work`, `/work/[clientId]`, `/about`, `/services`, `/contact`, and the global `navigation.tsx`/`footer.tsx`.
 - `src/data/` — the site's content layer (clients, projects, services, testimonials, social campaigns, reels/showreels, philosophy, about copy, navigation, site config, category taxonomy, and the derived accessor functions like `getFeaturedProjects`, `getClientStories`, `getServicesForCategories`). Treat this as correct and load-bearing; only change it when a task explicitly calls for a content/data change.
-- `src/lib/validations/contact.ts`, `src/lib/resend.ts`, `src/app/api/contact/route.ts` — the contact form pipeline (Zod schema → Resend send). FROZEN; see above.
+- `src/lib/validations/contact.ts`, `src/lib/mailer.ts`, `src/app/api/contact/route.ts` — the contact form pipeline (Zod schema → SMTP send via Nodemailer). FROZEN; see above.
 
 ## Static assets
 
