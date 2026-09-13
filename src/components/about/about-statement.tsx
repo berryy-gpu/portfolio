@@ -12,10 +12,11 @@
  * clipReveal entrance (RevealImage) plus a grayscale->colour fade on the
  * portrait — opacity only (a static-grayscale overlay crossfading out
  * over a static-colour image beneath), never `filter`, which the
- * performance budget excludes from scroll loops. next/image (via
- * RevealImage) already serves the Phase 1 optimised avif/webp variants
- * of me.png automatically through content negotiation — no need to
- * hardcode a specific format.
+ * performance budget excludes from scroll loops. `siteConfig.avatar`
+ * points at the pre-generated me.webp (156KB) rather than the 1.95MB
+ * me.png source — next/image still re-encodes to avif for browsers that
+ * support it, but starting from the smaller webp means the optimizer
+ * isn't decoding a 2MB PNG on every cold cache miss.
  *
  * The grayscale fade is MOUNT-triggered, not scroll-scrubbed — this
  * section sits above the fold, so a scroll-scrub trigger boundary

@@ -16,12 +16,28 @@
  * and fully silent under prefers-reduced-motion regardless of the stored
  * preference (no listener is even armed in that case).
  *
- * `playHover`/`playClick`/`playTransition` are exposed as ready-to-use
- * one-shot triggers; only `playTransition` is actually wired up (
- * transition-provider.tsx calls it on transition START, per spec —
- * "fire on transition START, not completion"). Hover/click SFX are real,
- * working infrastructure but not retrofitted onto every interactive
- * element site-wide in this pass.
+ * `playHover`/`playClick`/`playTransition` are ready-to-use one-shot
+ * triggers, wired onto TransitionLink (click, opt-in hover), the sound
+ * toggle, primary CTAs, and work/gallery cards site-wide.
+ *
+ * Diagnosed the "sound stops on page change" report with a real CDP-driven
+ * browser walkthrough (headless Chrome, both `next dev` and a production
+ * build) clicking through Nav -> /work -> /about -> /services -> /contact
+ * -> / via the real TransitionLink soft-navigation path: AudioContext.state
+ * stayed "running" and the ambient effect never re-ran across every
+ * client-side route change — SoundProvider genuinely does not remount, and
+ * the audio pipeline is not interrupted by soft navigation. The one
+ * reproducible gap is a HARD page load (typing a URL, a refresh, a
+ * bookmark, an externally-opened link) — a fresh mount of SoundProvider
+ * always starts with `hasInteracted: false`, so ambient waits on a brand
+ * new gesture even if the visitor already engaged with the site moments
+ * earlier in the same tab. `hasInteracted` (unlike `muted`) is now also
+ * mirrored into sessionStorage so a hard reload within the same tab
+ * session re-arms immediately on mount instead of waiting for a second
+ * gesture — this doesn't fight the "silent on a genuinely fresh visit"
+ * design (a new tab/session has no sessionStorage entry), and the resume
+ * attempt it triggers fails silently if the browser's autoplay policy
+ * still blocks it, falling back to the existing first-interaction listener.
  */
 
 import {
@@ -34,9 +50,9 @@ import {
   type ReactNode,
 } from "react";
 import { useReducedMotion } from "framer-motion";
-import { usePathname } from "next/navigation";
 
 const STORAGE_KEY = "portfolio:sound-muted";
+const SESSION_INTERACTED_KEY = "portfolio:sound-interacted-session";
 const AMBIENT_GAIN = 0.08;
 const UI_GAIN = 0.15;
 const AMBIENT_FALLBACK_DURATION_S = 96;
@@ -67,16 +83,17 @@ export function useSound() {
 }
 
 export function SoundProvider({ children }: { children: ReactNode }) {
-  // TEMPORARY — step 6 diagnosis, remove after.
-  console.log("SoundProvider mount");
   const prefersReducedMotion = useReducedMotion();
-  const pathname = usePathname();
   // `muted` is the persisted, explicit opt-out — starts false (the
   // hydration-safe default) since nothing plays until a real gesture
   // fires regardless of this value; corrected from localStorage on mount.
   const [muted, setMuted] = useState(false);
   // Becomes true once on the first qualifying gesture (or a toggle
-  // click, which is itself a gesture) — never resets for the session.
+  // click, which is itself a gesture) — never resets for the rest of a
+  // client-side-navigated session (soft nav never remounts this
+  // provider). Seeded from sessionStorage on mount so a HARD reload
+  // within the same tab re-arms immediately instead of waiting on a
+  // second gesture — see the docstring above.
   const [hasInteracted, setHasInteracted] = useState(false);
   const enabled = hasInteracted && !muted;
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -88,24 +105,33 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       setMuted(window.localStorage.getItem(STORAGE_KEY) === "1");
+      if (window.sessionStorage.getItem(SESSION_INTERACTED_KEY) === "1") {
+        setHasInteracted(true);
+      }
     } catch {
-      // localStorage unavailable — stays unmuted (still gated on a
-      // real first interaction below, so nothing plays regardless).
+      // storage unavailable — stays unmuted/un-interacted (still gated
+      // on a real first interaction below, so nothing plays regardless).
     }
   }, []);
 
+  // The one-time first-interaction listener — armed whenever there's
+  // still something it needs to do (not muted, motion allowed).
+  // Deliberately NOT gated on `hasInteracted` alone: on a hard reload
+  // seeded from sessionStorage, `hasInteracted` starts true but the
+  // AudioContext still starts "suspended" (a fresh document has no live
+  // user-gesture activation yet, so the ambient effect's own resume()
+  // attempt silently fails) — this listener is what actually resumes it
+  // on the visitor's next real gesture, on top of its original job of
+  // setting `hasInteracted` for a genuinely fresh visit. Removes itself
+  // after firing once, per spec.
   useEffect(() => {
-    // TEMPORARY — step 6 diagnosis, remove after.
-    console.log("route change", { pathname, ctxState: audioCtxRef.current?.state });
-  }, [pathname]);
+    if (muted || prefersReducedMotion) return;
 
-  // The one-time first-interaction listener — armed only when there's
-  // something to arm for (not already interacted, not muted, motion
-  // allowed). Removes itself after firing once, per spec.
-  useEffect(() => {
-    if (hasInteracted || muted || prefersReducedMotion) return;
-
-    const handleFirstInteraction = () => setHasInteracted(true);
+    const handleFirstInteraction = () => {
+      setHasInteracted(true);
+      const ctx = audioCtxRef.current;
+      if (ctx?.state === "suspended") void ctx.resume().catch(() => {});
+    };
 
     FIRST_INTERACTION_EVENTS.forEach((eventName) =>
       window.addEventListener(eventName, handleFirstInteraction, { once: true, passive: true })
@@ -116,7 +142,17 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         window.removeEventListener(eventName, handleFirstInteraction)
       );
     };
-  }, [hasInteracted, muted, prefersReducedMotion]);
+  }, [muted, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!hasInteracted) return;
+    try {
+      window.sessionStorage.setItem(SESSION_INTERACTED_KEY, "1");
+    } catch {
+      // sessionStorage unavailable — a hard reload just waits on a fresh
+      // gesture again, same as before this fix.
+    }
+  }, [hasInteracted]);
 
   const ensureContext = (): AudioContext | null => {
     if (typeof window === "undefined") return null;
@@ -155,9 +191,6 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // TEMPORARY — step 6 diagnosis, remove after.
-    console.log("ambient effect start", { enabled, prefersReducedMotion });
-
     if (!enabled || prefersReducedMotion) {
       stopAmbient();
       return;
@@ -165,7 +198,6 @@ export function SoundProvider({ children }: { children: ReactNode }) {
 
     const ctx = ensureContext();
     if (!ctx) return;
-    console.log("ambient effect: ctx.state before resume", ctx.state);
     if (ctx.state === "suspended") void ctx.resume().catch(() => {});
     let cancelled = false;
 
@@ -208,8 +240,6 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     })();
 
     return () => {
-      // TEMPORARY — step 6 diagnosis, remove after.
-      console.log("ambient effect cleanup", { enabled, prefersReducedMotion });
       cancelled = true;
       stopAmbient();
     };
@@ -218,8 +248,6 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleVisibility = () => {
       const ctx = audioCtxRef.current;
-      // TEMPORARY — step 6 diagnosis, remove after.
-      console.log("visibilitychange", { hidden: document.hidden, ctxState: ctx?.state });
       if (!ctx) return;
       if (document.hidden) {
         ctx.suspend().catch(() => {});

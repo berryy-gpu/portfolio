@@ -21,7 +21,7 @@ export const siteConfig: SiteConfig = {
   tagline: "I build what ambitious brands grow on.",
   email: "m.baranhaider2018@gmail.com",
   location: "Lahore, PK",
-  avatar: "/images/profile/me.png",
+  avatar: "/images/profile/me.webp",
   socialLinks: [
     { label: "Instagram", url: "https://www.instagram.com/baranhaider.dev/" },
     { label: "LinkedIn", url: "https://www.linkedin.com/in/baran-haider-288326353" },

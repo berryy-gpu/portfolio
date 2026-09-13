@@ -8,6 +8,7 @@ import { PageTransition } from "@/components/layout/page-transition";
 import { Preloader } from "@/components/layout/preloader";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { SoundToggle } from "@/components/layout/sound-toggle";
+import { ParticleField } from "@/components/motion/particle-field";
 import { Providers } from "@/components/providers/providers";
 import { siteConfig } from "@/data/site";
 import { siteUrl } from "@/lib/site-url";
@@ -76,11 +77,19 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <a
           href="#main-content"
+          // z-[1000] intentionally matches zIndex.loading (motion-tokens.ts)
+          // rather than importing it — Tailwind's `focus:` variant needs a
+          // statically-analyzable literal class at build time, so a JS
+          // constant can't be interpolated in here the way every other
+          // z-index in the codebase uses the shared object directly via an
+          // inline style. Keep this numeric literal in sync with
+          // zIndex.loading if that token ever changes.
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[1000] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-text-primary"
         >
           Skip to content
         </a>
         <Providers>
+          <ParticleField />
           <Preloader />
           <PageTransition />
           <ScrollProgress />

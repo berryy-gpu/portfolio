@@ -38,8 +38,15 @@ export const zIndex = {
   /** The persistent WebGL canvas — deliberately negative, not 0, so it
    *  stacks behind ordinary in-flow page content by construction rather
    *  than relying on every section that might overlap it to remember to
-   *  set its own z-index. See persistent-canvas.tsx. */
-  canvas: -1,
+   *  set its own z-index. See persistent-canvas.tsx. Sits one level below
+   *  `particles` (both are fixed, full-viewport, pointer-events:none
+   *  layers) so the ambient particle field reads above the graded-film
+   *  backdrop shader rather than being painted over by it. */
+  canvas: -2,
+  /** The persistent ambient particle field (particle-field.tsx) — see
+   *  `canvas` above for why this sits one level above it. Still behind
+   *  `base`, so it never competes with real page content. */
+  particles: -1,
   base: 0,
   elevated: 10,
   navigation: 100,

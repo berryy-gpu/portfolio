@@ -60,18 +60,18 @@ export const projects: Project[] = [
       "An editorial site for a Lahore architecture and interior studio — full-bleed aerial video hero, project galleries, and an ambient sound toggle.",
     websitePreview: {
       image: {
-        src: "/images/projects/ayarchitects-homepage-preview.png",
-        alt: "AY Architects — full homepage",
-        width: 1102,
+        src: "/images/projects/ayarchitects-aboutus-preview.webp",
+        alt: "AY Architects — about page",
+        width: 1119,
         height: 7800,
       },
       domain: "ayarchitects.site",
       type: "full-page",
     },
     images: [
-      { src: "/images/projects/ayarchitects-homepage.png", alt: "AY Architects — homepage" },
-      { src: "/images/projects/ayarchitects-aboutus.png", alt: "AY Architects — about" },
-      { src: "/images/projects/ayarchitects-services.png", alt: "AY Architects — services" },
+      { src: "/images/projects/ayarchitects-homepage-preview.webp", alt: "AY Architects — homepage" },
+      { src: "/images/projects/ayarchitects-aboutus-preview.webp", alt: "AY Architects — about" },
+      { src: "/images/projects/ayarchitects-services-preview.webp", alt: "AY Architects — services" },
       // A fourth "projects" gallery screenshot exists but the only file on
       // disk is "ayarchitects-projects page.png" — a literal space in the
       // filename. Deliberately not referenced here; flagged separately
@@ -87,25 +87,25 @@ export const projects: Project[] = [
     engagement: "build",
     websitePreview: {
       image: {
-        src: "/images/projects/cybernetix-homepage.png",
+        src: "/images/projects/cybernetix-homepage-preview.webp",
         alt: "Cybernetix — full homepage",
-        width: 1896,
-        height: 8612,
+        width: 660,
+        height: 3000,
       },
       domain: "cybernetix.ae",
       type: "full-page",
     },
     images: [
       {
-        src: "/images/projects/cybernetix-homepage.png",
+        src: "/images/projects/cybernetix-homepage-preview.webp",
         alt: "Cybernetix — homepage",
       },
       {
-        src: "/images/projects/cybernetix-aboutus.png",
+        src: "/images/projects/cybernetix-aboutus-preview.webp",
         alt: "Cybernetix — about us",
       },
       {
-        src: "/images/projects/cybernetix-services.png",
+        src: "/images/projects/cybernetix-services-preview.webp",
         alt: "Cybernetix — services",
       },
     ],
@@ -119,17 +119,17 @@ export const projects: Project[] = [
     engagement: "build",
     websitePreview: {
       image: {
-        src: "/images/projects/pixelscape-homepage.png",
+        src: "/images/projects/pixelscape-homepage-preview.webp",
         alt: "Pixelscape — full homepage",
-        width: 1918,
-        height: 6701,
+        width: 859,
+        height: 3000,
       },
       domain: "pixelscape.com.pk",
       type: "full-page",
     },
     images: [
       {
-        src: "/images/projects/pixelscape-homepage.png",
+        src: "/images/projects/pixelscape-homepage-preview.webp",
         alt: "Pixelscape — homepage",
       },
     ],
@@ -143,21 +143,24 @@ export const projects: Project[] = [
     engagement: "build",
     websitePreview: {
       image: {
-        src: "/images/projects/aureate-01.png",
+        src: "/images/projects/aureate-01-preview.webp",
         alt: "Aureate 161 — full homepage",
-        width: 1918,
-        height: 7210,
+        width: 798,
+        height: 3000,
       },
       domain: "aureate161.com",
       type: "full-page",
     },
+    // Only screens 1-3: ClientCaseStudyBody (client-story/client-case-study-body.tsx)
+    // renders at most three case-study images (one per BLOCKS entry —
+    // brief/approach/outcome), always images[0..2]. Screens 4-6 existed
+    // here but were provably unreachable by any component; removed as
+    // dead data. The source files (aureate-04/05/06.png) are left on disk
+    // rather than deleted, in case a future case-study redesign wants them.
     images: [
-      { src: "/images/projects/aureate-01.png", alt: "Aureate — screen 1" },
-      { src: "/images/projects/aureate-02.png", alt: "Aureate — screen 2" },
-      { src: "/images/projects/aureate-03.png", alt: "Aureate — screen 3" },
-      { src: "/images/projects/aureate-04.png", alt: "Aureate — screen 4" },
-      { src: "/images/projects/aureate-05.png", alt: "Aureate — screen 5" },
-      { src: "/images/projects/aureate-06.png", alt: "Aureate — screen 6" },
+      { src: "/images/projects/aureate-01-preview.webp", alt: "Aureate — screen 1" },
+      { src: "/images/projects/aureate-02.webp", alt: "Aureate — screen 2" },
+      { src: "/images/projects/aureate-03.webp", alt: "Aureate — screen 3" },
     ],
   },
   {
@@ -169,18 +172,18 @@ export const projects: Project[] = [
     engagement: "build",
     websitePreview: {
       image: {
-        src: "/images/projects/clix-homepage.png",
+        src: "/images/projects/clix-homepage-preview.webp",
         alt: "Clix — full homepage",
-        width: 1918,
-        height: 8856,
+        width: 650,
+        height: 3000,
       },
       domain: "clix-crm.com",
       type: "full-page",
     },
     images: [
-      { src: "/images/projects/clix-homepage.png", alt: "Clix — homepage" },
+      { src: "/images/projects/clix-homepage-preview.webp", alt: "Clix — homepage" },
       {
-        src: "/images/projects/clix-featurepage.png",
+        src: "/images/projects/clix-featurepage-preview.webp",
         alt: "Clix — feature page",
       },
     ],
@@ -194,17 +197,17 @@ export const projects: Project[] = [
     engagement: "build",
     websitePreview: {
       image: {
-        src: "/images/projects/hihat-homepage.png",
+        src: "/images/projects/hihat-homepage-preview.webp",
         alt: "Hi-Hat Productions — full homepage",
-        width: 1916,
-        height: 8728,
+        width: 659,
+        height: 3000,
       },
       domain: "hi-hatproductions.com",
       type: "full-page",
     },
     images: [
-      { src: "/images/projects/hihat-homepage.png", alt: "Hihat — homepage" },
-      { src: "/images/projects/hihat-aboutus.png", alt: "Hihat — about us" },
+      { src: "/images/projects/hihat-homepage-preview.webp", alt: "Hihat — homepage" },
+      { src: "/images/projects/hihat-aboutus-preview.webp", alt: "Hihat — about us" },
     ],
   },
   {

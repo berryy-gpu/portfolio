@@ -30,7 +30,7 @@ export const services: Service[] = [
     categoryIds: ["web-development"],
     order: 1,
     previewImage: {
-      src: "/images/projects/cybernetix-homepage.png",
+      src: "/images/projects/cybernetix-homepage-preview.webp",
       alt: "Cybernetix — homepage",
     },
   },

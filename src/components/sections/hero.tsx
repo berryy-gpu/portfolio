@@ -15,13 +15,15 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type RefObject } from "react";
 import { useReducedMotion } from "framer-motion";
 
 import { Magnetic } from "@/components/motion/magnetic";
+import { ScrambleText } from "@/components/motion/scramble-text";
 import { SplitTextReveal } from "@/components/motion/split-text";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { LiveClock } from "@/components/ui/live-clock";
+import { useSound } from "@/components/providers/sound-provider";
 import { useQualityTier } from "@/hooks/use-quality-tier";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useWebglSupported } from "@/hooks/use-webgl-supported";
@@ -62,6 +64,37 @@ function renderTaglineWithAccent(tagline: string, word: string) {
   );
 }
 
+// A separate, aria-hidden overlay rather than swapping the h1's own
+// content: the h1 is owned by SplitTextReveal's GSAP SplitText mount
+// entrance, which rebuilds its DOM via innerHTML during split/revert —
+// confirmed live (Chrome, real hover) that a ScrambleText living inside
+// that subtree fires its state updates correctly but they never appear
+// on screen, because SplitText's revert() re-parses fresh nodes from
+// saved HTML rather than restoring the exact instances React committed,
+// silently orphaning any fiber still pointing at the pre-split node.
+// This overlay sits outside the h1 entirely (a sibling, absolutely
+// positioned over it), so GSAP never touches it and React always owns
+// it. The h1 keeps the real, always-accessible text and is only visually
+// hidden (not unmounted) while the scramble overlay is shown.
+function renderScrambledTagline(tagline: string, word: string, active: boolean) {
+  const index = tagline.toLowerCase().indexOf(word.toLowerCase());
+  if (index === -1) return <ScrambleText text={tagline} active={active} />;
+
+  const before = tagline.slice(0, index);
+  const match = tagline.slice(index, index + word.length);
+  const after = tagline.slice(index + word.length);
+
+  return (
+    <>
+      <ScrambleText text={before} active={active} />
+      <span className="text-accent">
+        <ScrambleText text={match} active={active} />
+      </span>
+      <ScrambleText text={after} active={active} />
+    </>
+  );
+}
+
 export function Hero() {
   const tier = useQualityTier();
   const isCoarsePointer = useMediaQuery("(pointer: coarse)");
@@ -70,6 +103,20 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
   const scrollSegmentRef = useRef<HTMLDivElement>(null);
+  const [isPanelHovered, setIsPanelHovered] = useState(false);
+  const { playClick } = useSound();
+
+  const handlePanelMouseEnter = () => setIsPanelHovered(true);
+  const handlePanelMouseLeave = () => setIsPanelHovered(false);
+  // TransitionLink already plays its own click sound (unconditionally, on
+  // every real click — see that file's docstring), so a click landing on
+  // one of the CTAs inside this panel would double up with this handler.
+  // Only fire for clicks on the panel's own surface (tagline, badges,
+  // background), not ones bubbling up from a link/button descendant.
+  const handlePanelClick = (event: MouseEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("a, button")) return;
+    playClick();
+  };
 
   // Mirrors webgl-provider.tsx's own mount decision — WebGL support and
   // reduced-motion are the only two things allowed to hide the video
@@ -170,15 +217,65 @@ export function Hero() {
           </span>
         </div>
 
-        <div className="flex max-w-5xl flex-col gap-8 rounded-lg border border-border bg-surface/45 p-6 shadow-glass backdrop-blur-functional md:p-10">
-          <SplitTextReveal
-            as="h1"
-            preset="maskUp"
-            trigger="mount"
-            className="font-heading text-display-xxl tracking-display text-text-primary"
-          >
-            {renderTaglineWithAccent(heroConfig.content.tagline, ACCENT_WORD)}
-          </SplitTextReveal>
+        <div
+          onMouseEnter={handlePanelMouseEnter}
+          onMouseLeave={handlePanelMouseLeave}
+          onClick={handlePanelClick}
+          className={cn(
+            "flex max-w-5xl flex-col gap-8 rounded-lg border bg-surface/45 p-6 backdrop-blur-functional transition-[box-shadow,border-color] duration-500 ease-out md:p-10",
+            isPanelHovered
+              ? "border-accent shadow-[var(--shadow-glass),0_0_0_1px_var(--accent),0_0_36px_-6px_var(--accent)]"
+              : "border-border shadow-glass"
+          )}
+        >
+          <div className="relative">
+            <SplitTextReveal
+              as="h1"
+              preset="maskUp"
+              trigger="mount"
+              className={cn(
+                "font-heading text-display-xxl tracking-display text-text-primary transition-opacity duration-150",
+                isPanelHovered && !prefersReducedMotion && "opacity-0"
+              )}
+            >
+              {renderTaglineWithAccent(heroConfig.content.tagline, ACCENT_WORD)}
+            </SplitTextReveal>
+
+            {!prefersReducedMotion && (
+              <p
+                aria-hidden="true"
+                className={cn(
+                  "pointer-events-none absolute inset-0 font-heading text-display-xxl tracking-display text-text-primary transition-opacity duration-150",
+                  isPanelHovered ? "opacity-100" : "opacity-0"
+                )}
+              >
+                {renderScrambledTagline(heroConfig.content.tagline, ACCENT_WORD, isPanelHovered)}
+              </p>
+            )}
+          </div>
+
+          <div className="relative max-w-2xl">
+            <p
+              className={cn(
+                "text-body-lg text-text-secondary transition-opacity duration-150",
+                isPanelHovered && !prefersReducedMotion && "opacity-0"
+              )}
+            >
+              {heroConfig.content.description}
+            </p>
+
+            {!prefersReducedMotion && (
+              <p
+                aria-hidden="true"
+                className={cn(
+                  "pointer-events-none absolute inset-0 text-body-lg text-text-secondary transition-opacity duration-150",
+                  isPanelHovered ? "opacity-100" : "opacity-0"
+                )}
+              >
+                <ScrambleText text={heroConfig.content.description} active={isPanelHovered} />
+              </p>
+            )}
+          </div>
 
           <div className="flex flex-wrap items-center gap-6">
             <Magnetic>
@@ -236,7 +333,16 @@ export function Hero() {
           <span
             aria-hidden="true"
             className={cn(
-              "rotate-90 font-mono text-caption tracking-caption text-text-secondary uppercase"
+              // mr-16 (64px) reserves exactly the sound-toggle's fixed
+              // bottom-right footprint (24px inset + 40px width — see
+              // sound-toggle.tsx) so this decorative cue never sits under
+              // it — confirmed colliding at every common viewport size
+              // (not just mobile) before this was added, since both
+              // independently anchor to "~24px from the bottom-right
+              // corner." Overlap wasn't just visual: at equal effective
+              // z-index, DOM order put this span above the button, so it
+              // could also swallow taps meant for the toggle.
+              "mr-16 rotate-90 font-mono text-caption tracking-caption text-text-secondary uppercase"
             )}
           >
             Scroll

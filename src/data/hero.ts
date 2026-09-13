@@ -19,6 +19,13 @@ export interface HeroIdentity {
 
 export interface HeroContent {
   tagline: string;
+  /**
+   * A longer supporting line below the tagline — Hero-specific copy, not
+   * sourced from `siteConfig` like `tagline` is, since it's too long for
+   * the page `<title>`/meta description/OG subtitle that `siteConfig.tagline`
+   * also feeds (see layout.tsx, opengraph-image.tsx).
+   */
+  description: string;
 }
 
 export interface HeroCta {
@@ -57,6 +64,8 @@ export const heroConfig: HeroConfig = {
   },
   content: {
     tagline: siteConfig.tagline ?? "",
+    description:
+      "I craft refined digital experiences for ambitious brands ready to lead, not follow. Blending thoughtful design, strategic thinking, and modern technology, I build digital foundations that elevate perception, create meaningful connections, and turn attention into lasting growth.",
   },
   cta: {
     label: "View Work",
