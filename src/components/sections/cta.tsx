@@ -1,31 +1,26 @@
 "use client";
 
 /**
- * REBUILD-SPEC.md section 10 — the homepage's final conversion point and
- * the site's second (and final) 3D moment, tier 'high' only. The single
- * filled --accent button on the homepage — reserved for exactly this one
- * moment, per the "accent is an event" rule.
+ * REBUILD-SPEC.md section 10 — the homepage's final conversion point. The
+ * single filled --accent button on the homepage — reserved for exactly
+ * this one moment, per the "accent is an event" rule.
  *
- * IMPORTANT known consequence, flagged rather than silently accepted:
- * the icosahedron (CtaView) renders via the one shared, persistent WebGL
- * canvas (persistent-canvas.tsx), which is a SEPARATE, globally
- * `position: fixed` element at `zIndex.canvas` — the tracked `<View>` div
- * CtaView renders here is just an invisible bounding-box reference for
- * that canvas' scissor rect, not the actual pixels. The opaque
- * `bg-background` + `zIndex.particleOcclusion` wrapper below (added to
- * occlude the site-wide ParticleField within this section, per the
- * trygon particle work) sits ABOVE that global canvas in the root
- * stacking order and is fully opaque — it will occlude the icosahedron
- * too, everywhere this section covers, regardless of tier. There is no
- * z-index arrangement that hides only the particle field while leaving
- * the shared canvas visible in the same rect: opacity blocks everything
- * strictly behind it, independent of how many discrete layers exist
- * below. This trade-off needs an explicit decision, not an assumption.
+ * Used to also mount CtaView, a tier-'high'-only icosahedron rendered via
+ * the shared persistent WebGL canvas (persistent-canvas.tsx). Removed
+ * (per explicit decision, not a silent cut) for two independent reasons
+ * discovered during the trygon particle work: (1) the opaque
+ * `bg-background` + `zIndex.particleOcclusion` wrapper below — needed to
+ * occlude the site-wide ParticleField within this section — sits above
+ * that shared canvas in the stacking order and made the icosahedron
+ * permanently invisible anyway; (2) mounting CtaView at tier 'high' hit a
+ * severe, reproducible pre-existing main-thread stall (60-120s during
+ * scroll) that predates this change — confirmed against the pre-trygon
+ * commit in an isolated worktree. `cta-view.tsx`/`cta-scene.tsx` were
+ * deleted as now-fully-unused; the shared canvas itself
+ * (persistent-canvas.tsx) stays, since BackdropScene still renders there.
  */
 
-import dynamic from "next/dynamic";
 import { ArrowUpRight } from "lucide-react";
-import { useRef, type RefObject } from "react";
 
 import { TransitionLink } from "@/components/layout/transition-link";
 import { Magnetic } from "@/components/motion/magnetic";
@@ -36,31 +31,19 @@ import { Container } from "@/components/ui/container";
 import { RotatingBadge } from "@/components/ui/rotating-badge";
 import { homepageCtaConfig } from "@/data/homepage-cta";
 import { siteConfig } from "@/data/site";
-import { useQualityTier } from "@/hooks/use-quality-tier";
 import { zIndex } from "@/lib/motion-tokens";
 
-const CtaView = dynamic(
-  () => import("@/components/three/cta-view").then((mod) => mod.CtaView),
-  { ssr: false }
-);
-
 export function Cta() {
-  const tier = useQualityTier();
-  const sectionRef = useRef<HTMLElement>(null);
-
   if (!homepageCtaConfig.message) return null;
 
   return (
     <section
-      ref={sectionRef}
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden"
       style={{ zIndex: zIndex.particleOcclusion }}
     >
       <div className="absolute inset-0 -z-10 bg-background">
         <TrygonField id="particle-field-cta" />
       </div>
-
-      {tier === "high" && <CtaView track={sectionRef as RefObject<HTMLElement>} />}
 
       <Container
         width="reading"
