@@ -4,12 +4,18 @@
  * Services' cinematic intro — same bespoke big-type/staggered-entrance
  * pattern as WorkHeader/AboutStatement/ClientHero. The headline is the
  * literal question this page exists to answer.
+ *
+ * `bg-background` + `zIndex.particleOcclusion` (not just `relative`) on
+ * the section establish a local stacking context so this section's own
+ * local "trygon" particle field replaces the site-wide ambient field
+ * within its bounds — see hero.tsx's docstring for the full mechanics.
  */
 
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Container } from "@/components/ui/container";
-import { easing } from "@/lib/motion-tokens";
+import { TrygonField } from "@/components/motion/trygon-field";
+import { easing, zIndex } from "@/lib/motion-tokens";
 
 const containerVariants = {
   hidden: {},
@@ -29,8 +35,12 @@ export function ServicesHero() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <section className="py-generous md:py-expansive">
-      <Container>
+    <section
+      className="relative overflow-hidden bg-background py-generous md:py-expansive"
+      style={{ zIndex: zIndex.particleOcclusion }}
+    >
+      <TrygonField id="particle-field-services-hero" />
+      <Container className="relative z-10">
         <motion.div
           initial={prefersReducedMotion ? undefined : "hidden"}
           animate="visible"

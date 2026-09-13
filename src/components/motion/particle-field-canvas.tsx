@@ -27,9 +27,15 @@ async function initEngine(engine: Engine) {
 interface ParticleFieldCanvasProps {
   options: ISourceOptions;
   style: CSSProperties;
+  /** Defaults to "particle-field" (the site-wide instance's original
+   *  hardcoded id) so that caller is unaffected by this prop's addition.
+   *  Every other mounted instance needs its own unique, stable id — two
+   *  instances sharing one would collide in tsParticles' internal DOM
+   *  registry. */
+  id?: string;
 }
 
-export function ParticleFieldCanvas({ options, style }: ParticleFieldCanvasProps) {
+export function ParticleFieldCanvas({ options, style, id = "particle-field" }: ParticleFieldCanvasProps) {
   const containerRef = useRef<Container | undefined>(undefined);
 
   const handleLoaded = (container?: Container) => {
@@ -52,7 +58,7 @@ export function ParticleFieldCanvas({ options, style }: ParticleFieldCanvasProps
 
   return (
     <ParticlesProvider init={initEngine}>
-      <Particles id="particle-field" options={options} style={style} particlesLoaded={handleLoaded} />
+      <Particles id={id} options={options} style={style} particlesLoaded={handleLoaded} />
     </ParticlesProvider>
   );
 }

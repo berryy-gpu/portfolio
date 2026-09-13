@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref } from "react";
+import { type CSSProperties, type ReactNode, type Ref } from "react";
 
 import { Container } from "./container";
 import { SectionHeader } from "./section-header";
@@ -26,6 +26,18 @@ interface SectionProps {
   contentRef?: Ref<HTMLDivElement>;
   className?: string;
   contentClassName?: string;
+  /** Escape hatch for the handful of callers that need a JS token (e.g.
+   *  `zIndex.*` from motion-tokens.ts) on the `<section>` itself — z-index
+   *  values are JS constants site-wide, not Tailwind classes, so this
+   *  can't be expressed via `className` alone. Optional; every existing
+   *  caller is unaffected. */
+  style?: CSSProperties;
+  /** Rendered as a direct child of `<section>`, BEFORE `<Container>` —
+   *  for full-bleed decoration (e.g. a local particle field) that needs
+   *  to fill the section's actual width, not the (often narrower)
+   *  Container's max-width. Optional; every existing caller is
+   *  unaffected. */
+  background?: ReactNode;
   children: ReactNode;
 }
 
@@ -52,10 +64,13 @@ export function Section({
   contentRef,
   className,
   contentClassName,
+  style,
+  background,
   children,
 }: SectionProps) {
   return (
-    <section className={cn(spacingClasses[spacing], className)}>
+    <section className={cn(spacingClasses[spacing], className)} style={style}>
+      {background}
       <Container width={containerWidth}>
         {header && <SectionHeader {...header} />}
         <div ref={contentRef} className={contentClassName}>

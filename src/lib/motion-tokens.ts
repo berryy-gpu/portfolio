@@ -48,6 +48,18 @@ export const zIndex = {
    *  `base`, so it never competes with real page content. */
   particles: -1,
   base: 0,
+  /** Sections that mount their own local "trygon" particle field
+   *  (Hero, Cta, ServicesHero, ServicesCta, AboutCta, ClientHero) need an
+   *  explicit z-index — not just `position: relative` — so the section
+   *  establishes its own stacking context above `particles`. Without
+   *  that, the section's own background/local-particles/content don't
+   *  paint as one atomic unit; a plain `position: relative` section with
+   *  z-index left at `auto` still resolves any negatively-z-indexed
+   *  descendant of its own against the *global* stacking order (where it
+   *  would lose to `canvas`/`particles`), not scoped to the section, so
+   *  the fixed site-wide field would show through instead of being
+   *  occluded. See trygon-field.tsx / motion/trygon-field.tsx callers. */
+  particleOcclusion: 1,
   elevated: 10,
   navigation: 100,
   /** Fixed scroll-progress bar (layout/scroll-progress.tsx) — above nav,

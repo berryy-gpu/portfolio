@@ -5,9 +5,21 @@
  * site's first of two sanctioned 3D moments — a shader-graded video
  * texture rendered via the persistent WebGL canvas (hero-view.tsx/
  * hero-scene.tsx/hero-material.ts). Removed by explicit request; the
- * background is now always the static poster image + noise overlay that
- * used to be the WebGL-unsupported/reduced-motion fallback. The CTA scene
- * (Phase 8/10) remains the site's one 3D moment.
+ * background is now plain `bg-background` + noise overlay + this
+ * section's own local "trygon" particle field (the poster image that
+ * briefly replaced the video is also gone — it referenced a file already
+ * deleted from public/, a dead reference only "working" via Next's image-
+ * optimizer/browser cache). The CTA scene (Phase 8/10) remains the site's
+ * one 3D moment.
+ *
+ * The background wrapper carries an explicit z-index (zIndex.
+ * particleOcclusion, motion-tokens.ts) on top of `relative` — not just
+ * `relative` alone — so this section establishes its own local stacking
+ * context and paints as one opaque unit above the fixed, site-wide
+ * ParticleField (zIndex.particles). Without that explicit z-index, this
+ * section's own negatively-z-indexed background div would resolve
+ * against the *global* stacking order (where it would lose to the
+ * site-wide field) rather than being scoped locally.
  *
  * Cancels the root layout's `pt-16` nav-clearance padding with `-mt-16`
  * so the (transparent-at-scroll-0) fixed nav floats over this section
@@ -15,13 +27,13 @@
  * that.
  */
 
-import Image from "next/image";
 import { useRef, useState, type MouseEvent } from "react";
 import { useReducedMotion } from "framer-motion";
 
 import { Magnetic } from "@/components/motion/magnetic";
 import { ScrambleText } from "@/components/motion/scramble-text";
 import { SplitTextReveal } from "@/components/motion/split-text";
+import { TrygonField } from "@/components/motion/trygon-field";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { LiveClock } from "@/components/ui/live-clock";
 import { useSound } from "@/components/providers/sound-provider";
@@ -31,6 +43,7 @@ import { heroConfig } from "@/data/hero";
 import { services } from "@/data/services";
 import { siteConfig } from "@/data/site";
 import { gsap } from "@/lib/gsap";
+import { zIndex } from "@/lib/motion-tokens";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -123,16 +136,12 @@ export function Hero() {
   }, [prefersReducedMotion]);
 
   return (
-    <section className="relative -mt-16 flex min-h-screen flex-col overflow-hidden pt-16">
-      <div className="absolute inset-0 -z-10">
-        <Image
-          src="/images/posters/hero.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
+    <section
+      className="relative -mt-16 flex min-h-screen flex-col overflow-hidden pt-16"
+      style={{ zIndex: zIndex.particleOcclusion }}
+    >
+      <div className="absolute inset-0 -z-10 bg-background">
+        <TrygonField id="particle-field-hero" />
         <div
           aria-hidden="true"
           className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
