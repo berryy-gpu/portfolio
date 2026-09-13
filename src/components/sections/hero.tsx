@@ -206,7 +206,7 @@ export function Hero() {
         </div>
       )}
 
-      <div className="relative z-10 flex flex-1 flex-col justify-between gap-8 px-6 py-8 md:px-10 md:py-10">
+      <div className="relative z-10 flex flex-1 flex-col justify-between gap-4 px-6 py-5 sm:gap-6 sm:py-6 md:gap-8 md:px-10 md:py-10">
         <div className="inline-flex w-fit items-center gap-2 rounded-pill border border-border bg-surface/50 px-4 py-2 backdrop-blur-functional">
           <span
             aria-hidden="true"
@@ -222,7 +222,7 @@ export function Hero() {
           onMouseLeave={handlePanelMouseLeave}
           onClick={handlePanelClick}
           className={cn(
-            "flex max-w-5xl flex-col gap-8 rounded-lg border bg-surface/45 p-6 backdrop-blur-functional transition-[box-shadow,border-color] duration-500 ease-out md:p-10",
+            "flex max-w-5xl flex-col gap-4 rounded-lg border bg-surface/45 p-4 backdrop-blur-functional transition-[box-shadow,border-color] duration-500 ease-out sm:gap-6 sm:p-6 md:gap-8 md:p-10",
             isPanelHovered
               ? "border-accent shadow-[var(--shadow-glass),0_0_0_1px_var(--accent),0_0_36px_-6px_var(--accent)]"
               : "border-border shadow-glass"
@@ -257,7 +257,7 @@ export function Hero() {
           <div className="relative max-w-2xl">
             <p
               className={cn(
-                "text-body-lg text-text-secondary transition-opacity duration-150",
+                "text-small sm:text-body md:text-body-lg text-text-secondary transition-opacity duration-150",
                 isPanelHovered && !prefersReducedMotion && "opacity-0"
               )}
             >
@@ -268,7 +268,7 @@ export function Hero() {
               <p
                 aria-hidden="true"
                 className={cn(
-                  "pointer-events-none absolute inset-0 text-body-lg text-text-secondary transition-opacity duration-150",
+                  "pointer-events-none absolute inset-0 text-small sm:text-body md:text-body-lg text-text-secondary transition-opacity duration-150",
                   isPanelHovered ? "opacity-100" : "opacity-0"
                 )}
               >

@@ -38,6 +38,22 @@
  * design (a new tab/session has no sessionStorage entry), and the resume
  * attempt it triggers fails silently if the browser's autoplay policy
  * still blocks it, falling back to the existing first-interaction listener.
+ *
+ * Re-verified for the go-live pass with a scripted Playwright walkthrough
+ * (real Chromium, instrumented AudioContext instances, not just state
+ * inspection) covering cases the earlier diagnosis didn't: 6 sequential
+ * TransitionLink navigations plus rapid back-to-back clicks (150ms apart,
+ * shorter than the transition's own ~1.2s cycle) never created a second
+ * AudioContext or dropped `state` from "running". Also let a real session
+ * run past the ambient loop's own ~96s crossfade boundary while navigating
+ * — `scheduleNext`'s setTimeout fired and rescheduled correctly even with
+ * a route change landing right on top of it. The hard-reload gap above is
+ * real and unavoidable (confirmed against Chromium's actual default
+ * autoplay policy, not a permissive test flag: a fresh document's
+ * AudioContext starts "suspended" and `currentTime` stays frozen at 0
+ * until the next real gesture, exactly as browsers require) — the
+ * sessionStorage re-arm plus fallback listener already handle it as well
+ * as a page can.
  */
 
 import {
