@@ -1,11 +1,13 @@
 "use client";
 
 /**
- * The homepage's opening scene (REBUILD-SPEC.md section 01) — the site's
- * FIRST of two sanctioned 3D moments (the CTA scene, Phase 8/10, is the
- * second and final one). Runs on mobile: the WebGL plane still renders
- * there (dpr already capped to 1 site-wide for coarse pointers by
- * webgl-provider.tsx), just without postprocessing.
+ * The homepage's opening scene (REBUILD-SPEC.md section 01). Formerly the
+ * site's first of two sanctioned 3D moments — a shader-graded video
+ * texture rendered via the persistent WebGL canvas (hero-view.tsx/
+ * hero-scene.tsx/hero-material.ts). Removed by explicit request; the
+ * background is now always the static poster image + noise overlay that
+ * used to be the WebGL-unsupported/reduced-motion fallback. The CTA scene
+ * (Phase 8/10) remains the site's one 3D moment.
  *
  * Cancels the root layout's `pt-16` nav-clearance padding with `-mt-16`
  * so the (transparent-at-scroll-0) fixed nav floats over this section
@@ -13,9 +15,8 @@
  * that.
  */
 
-import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useRef, useState, type MouseEvent, type RefObject } from "react";
+import { useRef, useState, type MouseEvent } from "react";
 import { useReducedMotion } from "framer-motion";
 
 import { Magnetic } from "@/components/motion/magnetic";
@@ -24,9 +25,6 @@ import { SplitTextReveal } from "@/components/motion/split-text";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { LiveClock } from "@/components/ui/live-clock";
 import { useSound } from "@/components/providers/sound-provider";
-import { useQualityTier } from "@/hooks/use-quality-tier";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { useWebglSupported } from "@/hooks/use-webgl-supported";
 import { useIsomorphicLayoutEffect } from "@/hooks/use-isomorphic-layout-effect";
 import { contactCta } from "@/data/navigation";
 import { heroConfig } from "@/data/hero";
@@ -35,13 +33,6 @@ import { siteConfig } from "@/data/site";
 import { gsap } from "@/lib/gsap";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-// Keeps @react-three/* (~150KB) out of the homepage's initial bundle —
-// see hero-view.tsx's own docstring.
-const HeroView = dynamic(
-  () => import("@/components/three/hero-view").then((mod) => mod.HeroView),
-  { ssr: false }
-);
 
 const ACCENT_WORD = "grow";
 
@@ -96,12 +87,7 @@ function renderScrambledTagline(tagline: string, word: string, active: boolean) 
 }
 
 export function Hero() {
-  const tier = useQualityTier();
-  const isCoarsePointer = useMediaQuery("(pointer: coarse)");
   const prefersReducedMotion = useReducedMotion();
-  const webglSupported = useWebglSupported();
-  const sectionRef = useRef<HTMLElement>(null);
-  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
   const scrollSegmentRef = useRef<HTMLDivElement>(null);
   const [isPanelHovered, setIsPanelHovered] = useState(false);
   const { playClick } = useSound();
@@ -117,18 +103,6 @@ export function Hero() {
     if ((event.target as HTMLElement).closest("a, button")) return;
     playClick();
   };
-
-  // Mirrors webgl-provider.tsx's own mount decision — WebGL support and
-  // reduced-motion are the only two things allowed to hide the video
-  // entirely. The quality tier degrades what renders inside it (dpr,
-  // postprocessing — see webgl-provider.tsx / hero-scene.tsx) but must
-  // never be the reason the video disappears; that was the FIX 1 bug.
-  const showWebgl = webglSupported && !prefersReducedMotion;
-
-  useEffect(() => {
-    if (!videoElement) return;
-    videoElement.play().catch(() => {});
-  }, [videoElement]);
 
   useIsomorphicLayoutEffect(() => {
     if (prefersReducedMotion) return;
@@ -149,62 +123,25 @@ export function Hero() {
   }, [prefersReducedMotion]);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative -mt-16 flex min-h-screen flex-col overflow-hidden pt-16"
-    >
-      {showWebgl ? (
-        <>
-          <video
-            ref={setVideoElement}
-            data-preload-target="hero"
-            className="sr-only"
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster="/images/posters/hero.jpg"
-            aria-hidden="true"
-          >
-            {isCoarsePointer ? (
-              <source src="/videos/hero/hero-mobile.mp4" type="video/mp4" />
-            ) : (
-              <>
-                <source src="/videos/hero/hero-desktop.webm" type="video/webm" />
-                <source src="/videos/hero/hero-desktop.mp4" type="video/mp4" />
-              </>
-            )}
-          </video>
-
-          {videoElement && (
-            <HeroView
-              track={sectionRef as RefObject<HTMLElement>}
-              videoElement={videoElement}
-              tier={tier}
-              isCoarsePointer={isCoarsePointer}
-            />
-          )}
-        </>
-      ) : (
-        <div className="absolute inset-0 -z-10">
-          <Image
-            src="/images/posters/hero.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
-            style={{
-              backgroundImage:
-                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-            }}
-          />
-        </div>
-      )}
+    <section className="relative -mt-16 flex min-h-screen flex-col overflow-hidden pt-16">
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="/images/posters/hero.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          }}
+        />
+      </div>
 
       <div className="relative z-10 flex flex-1 flex-col justify-between gap-4 px-6 py-5 sm:gap-6 sm:py-6 md:gap-8 md:px-10 md:py-10">
         <div className="inline-flex w-fit items-center gap-2 rounded-pill border border-border bg-surface/50 px-4 py-2 backdrop-blur-functional">
